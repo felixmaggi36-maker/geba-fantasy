@@ -1,0 +1,2324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GEBA Fantasy DT</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #00C853;
+    --green-dark: #007B33;
+    --green-dim: #00C85322;
+    --gold: #FFD600;
+    --red: #FF1744;
+    --yellow: #FFEA00;
+    --bg: #0A0F0A;
+    --bg2: #111811;
+    --bg3: #192319;
+    --card: #141F14;
+    --border: #2a3d2a;
+    --text: #E8F5E9;
+    --muted: #6A8F6A;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* NOISE TEXTURE */
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events:none; z-index:0;
+  }
+
+  /* ===== LANDING ===== */
+  #landing {
+    min-height:100vh;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    position:relative; z-index:1;
+    padding: 2rem;
+  }
+
+  .gea-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(5rem, 20vw, 12rem);
+    line-height: 0.85;
+    color: var(--green);
+    text-shadow: 0 0 80px #00C85344, 0 0 200px #00C85322;
+    letter-spacing: 0.05em;
+    animation: glow 3s ease-in-out infinite alternate;
+  }
+
+  @keyframes glow {
+    from { text-shadow: 0 0 40px #00C85344, 0 0 100px #00C85322; }
+    to   { text-shadow: 0 0 80px #00C85388, 0 0 200px #00C85344; }
+  }
+
+  .gea-sub {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(1rem, 4vw, 1.6rem);
+    letter-spacing: 0.4em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-top: 0.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .roles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    width: 100%;
+    max-width: 700px;
+  }
+
+  .role-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .role-btn::before {
+    content:'';
+    position:absolute; bottom:0; left:0; right:0; height:2px;
+    background: var(--green);
+    transform: scaleX(0);
+    transition: transform 0.2s;
+  }
+  .role-btn:hover { border-color: var(--green); transform: translateY(-2px); }
+  .role-btn:hover::before { transform: scaleX(1); }
+  .role-btn .icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+  .role-btn .label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .role-btn .desc { font-size: 0.8rem; color: var(--muted); margin-top: 0.3rem; }
+
+  /* ===== LAYOUT ===== */
+  #app { display:none; min-height:100vh; position:relative; z-index:1; }
+
+  .topbar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 1.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top:0; z-index:100;
+  }
+  .topbar-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    color: var(--green);
+    letter-spacing: 0.1em;
+  }
+  .topbar-role {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 0.3rem 0.8rem;
+    border-radius: 2px;
+  }
+  .back-btn {
+    background: none; border: 1px solid var(--border);
+    color: var(--muted); padding: 0.3rem 0.8rem;
+    cursor:pointer; font-family:'Barlow Condensed',sans-serif;
+    font-size:0.85rem; letter-spacing:0.15em; text-transform:uppercase;
+    border-radius:2px; transition:all 0.2s;
+  }
+  .back-btn:hover { border-color:var(--green); color:var(--green); }
+
+  .main-content { padding: 1.5rem; max-width: 1100px; margin: 0 auto; }
+
+  /* ===== TABS ===== */
+  .tabs { display:flex; gap:0.25rem; margin-bottom:1.5rem; border-bottom:1px solid var(--border); }
+  .tab {
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:1rem; letter-spacing:0.1em; text-transform:uppercase;
+    padding:0.6rem 1.2rem; cursor:pointer; color:var(--muted);
+    border-bottom:2px solid transparent; transition:all 0.2s;
+    background:none; border-left:none; border-right:none; border-top:none;
+  }
+  .tab.active { color:var(--green); border-bottom-color:var(--green); }
+  .tab:hover { color:var(--text); }
+
+  /* ===== CARDS ===== */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .card-title {
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:1.1rem; letter-spacing:0.15em; text-transform:uppercase;
+    color:var(--green); margin-bottom:1rem;
+    display:flex; align-items:center; gap:0.5rem;
+  }
+
+  /* ===== FORMS ===== */
+  .form-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:0.75rem; margin-bottom:0.75rem; }
+  .form-group { display:flex; flex-direction:column; gap:0.3rem; }
+  label { font-size:0.75rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); }
+  input, select, textarea {
+    background: var(--bg3); border:1px solid var(--border);
+    color:var(--text); padding:0.55rem 0.75rem;
+    border-radius:3px; font-family:'Barlow',sans-serif; font-size:0.9rem;
+    transition: border-color 0.2s; outline:none;
+  }
+  input:focus, select:focus, textarea:focus { border-color:var(--green); }
+  select option { background:var(--bg2); }
+
+  .btn {
+    font-family:'Barlow Condensed',sans-serif;
+    letter-spacing:0.15em; text-transform:uppercase;
+    padding:0.6rem 1.4rem; border:none; border-radius:3px;
+    cursor:pointer; font-size:1rem; transition:all 0.2s;
+  }
+  .btn-primary { background:var(--green); color:#000; font-weight:700; }
+  .btn-primary:hover { background:#00e060; }
+  .btn-secondary { background:var(--bg3); color:var(--text); border:1px solid var(--border); }
+  .btn-secondary:hover { border-color:var(--green); }
+  .btn-danger { background:#FF174422; color:var(--red); border:1px solid #FF174433; }
+  .btn-danger:hover { background:#FF174444; }
+  .btn-sm { padding:0.35rem 0.8rem; font-size:0.82rem; }
+  .btn-gold { background:var(--gold); color:#000; font-weight:700; }
+  .btn-gold:hover { background:#ffe033; }
+
+  /* ===== TABLE ===== */
+  .data-table { width:100%; border-collapse:collapse; }
+  .data-table th {
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:0.78rem; letter-spacing:0.15em; text-transform:uppercase;
+    color:var(--muted); padding:0.5rem 0.75rem; text-align:left;
+    border-bottom:1px solid var(--border);
+  }
+  .data-table td { padding:0.55rem 0.75rem; border-bottom:1px solid #1a2a1a; font-size:0.88rem; }
+  .data-table tr:hover td { background:#ffffff06; }
+  .data-table tr:last-child td { border-bottom:none; }
+
+  /* ===== BADGES ===== */
+  .badge {
+    display:inline-block; padding:0.15rem 0.5rem; border-radius:2px;
+    font-family:'Barlow Condensed',sans-serif; font-size:0.75rem;
+    letter-spacing:0.08em; text-transform:uppercase; font-weight:600;
+  }
+  .badge-arq { background:#1a3a5c; color:#64B5F6; }
+  .badge-def { background:#1a3a1a; color:#81C784; }
+  .badge-med { background:#3a2a00; color:#FFD54F; }
+  .badge-del { background:#3a0a0a; color:#EF9A9A; }
+
+  /* ===== PITCH ===== */
+  .pitch-wrap { display:flex; flex-direction:column; align-items:center; gap:1rem; }
+  .pitch {
+    width:100%; max-width:420px;
+    background: linear-gradient(180deg, #0d2a0d 0%, #0a1f0a 100%);
+    border: 2px solid #2a4a2a;
+    border-radius: 8px;
+    padding: 1rem;
+    position:relative;
+    min-height: 520px;
+  }
+  .pitch::after {
+    content:'';
+    position:absolute; top:50%; left:10%; right:10%;
+    height:1px; background:#2a4a2a;
+  }
+  .pitch-row { display:flex; justify-content:center; gap:0.5rem; margin-bottom:0.75rem; }
+  .pitch-slot {
+    width:72px; text-align:center; cursor:pointer;
+  }
+  .pitch-slot .slot-circle {
+    width:52px; height:52px; border-radius:50%;
+    background:var(--bg3); border:2px dashed var(--border);
+    display:flex; align-items:center; justify-content:center;
+    margin:0 auto 0.3rem;
+    font-size:1.3rem;
+    transition:all 0.2s;
+    position:relative;
+  }
+  .pitch-slot.filled .slot-circle {
+    background:var(--green-dim); border-color:var(--green); border-style:solid;
+  }
+  .pitch-slot:hover .slot-circle { border-color:var(--gold); }
+  .pitch-slot .slot-name {
+    font-size:0.65rem; font-weight:600; color:var(--text);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    max-width:72px;
+  }
+  .pitch-slot .slot-team { font-size:0.6rem; color:var(--muted); }
+  .pitch-slot .slot-pts {
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:0.75rem; color:var(--gold); font-weight:700;
+  }
+
+  /* ===== PLAYER LIST ===== */
+  .player-list { max-height:400px; overflow-y:auto; }
+  .player-item {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0.5rem 0.75rem; border-bottom:1px solid #1a2a1a;
+    cursor:pointer; transition:background 0.15s;
+  }
+  .player-item:hover { background:#ffffff08; }
+  .player-item.selected { background:#00C85311; }
+  .player-item.unavailable { opacity:0.4; cursor:not-allowed; }
+  .player-info { display:flex; flex-direction:column; }
+  .player-name { font-weight:500; font-size:0.9rem; }
+  .player-meta { font-size:0.75rem; color:var(--muted); }
+  .player-pts {
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:1.1rem; color:var(--gold); font-weight:700; min-width:40px; text-align:right;
+  }
+
+  /* ===== SCORING PANEL ===== */
+  .scoring-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:0.5rem; }
+  .score-action {
+    background:var(--bg3); border:1px solid var(--border);
+    border-radius:3px; padding:0.75rem;
+    display:flex; flex-direction:column; align-items:center; gap:0.4rem;
+    cursor:pointer; transition:all 0.2s;
+  }
+  .score-action:hover { border-color:var(--green); }
+  .score-action .action-icon { font-size:1.5rem; }
+  .score-action .action-label { font-size:0.72rem; color:var(--muted); text-align:center; }
+  .score-action .action-pts {
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:1rem; font-weight:700;
+  }
+  .action-pos { color:var(--green); }
+  .action-neg { color:var(--red); }
+
+  /* ===== RANKING ===== */
+  .ranking-item {
+    display:flex; align-items:center; gap:1rem;
+    padding:0.75rem; border-bottom:1px solid var(--border);
+  }
+  .rank-num {
+    font-family:'Bebas Neue',sans-serif; font-size:2rem;
+    color:var(--border); min-width:2rem; text-align:center;
+  }
+  .rank-num.top1 { color:var(--gold); }
+  .rank-num.top2 { color:#C0C0C0; }
+  .rank-num.top3 { color:#CD7F32; }
+  .rank-info { flex:1; }
+  .rank-name { font-weight:600; font-size:1rem; }
+  .rank-team { font-size:0.78rem; color:var(--muted); }
+  .rank-pts {
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:1.8rem; font-weight:700; color:var(--green);
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    position:fixed; inset:0; background:#000000cc;
+    display:flex; align-items:center; justify-content:center;
+    z-index:1000; padding:1rem;
+  }
+  .modal {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:6px; padding:1.5rem; width:100%; max-width:480px;
+    max-height:90vh; overflow-y:auto;
+  }
+  .modal-title {
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:1.3rem; letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--green); margin-bottom:1rem;
+  }
+  .modal-actions { display:flex; gap:0.5rem; justify-content:flex-end; margin-top:1rem; }
+
+  /* ALERTS */
+  .alert {
+    padding:0.65rem 1rem; border-radius:3px; margin-bottom:0.75rem;
+    font-size:0.88rem; border-left:3px solid;
+  }
+  .alert-success { background:#00C85311; border-color:var(--green); color:#81C784; }
+  .alert-error { background:#FF174411; border-color:var(--red); color:#EF9A9A; }
+  .alert-info { background:#1565C011; border-color:#1565C0; color:#64B5F6; }
+
+  /* STATS BAR */
+  .stat-row { display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1rem; }
+  .stat-chip {
+    background:var(--bg3); border:1px solid var(--border);
+    border-radius:2px; padding:0.3rem 0.6rem;
+    font-size:0.78rem; color:var(--muted);
+  }
+  .stat-chip span { color:var(--text); font-weight:600; }
+
+  /* FILTER BAR */
+  .filter-bar { display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1rem; }
+  .filter-chip {
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:0.82rem; letter-spacing:0.08em; text-transform:uppercase;
+    padding:0.3rem 0.7rem; border-radius:2px; cursor:pointer;
+    background:var(--bg3); border:1px solid var(--border); color:var(--muted);
+    transition:all 0.15s;
+  }
+  .filter-chip.active { background:var(--green-dim); border-color:var(--green); color:var(--green); }
+
+  .empty-state { text-align:center; padding:3rem 1rem; color:var(--muted); }
+  .empty-state .empty-icon { font-size:3rem; margin-bottom:0.75rem; }
+  .empty-state p { font-size:0.9rem; }
+
+  .divider { border:none; border-top:1px solid var(--border); margin:1rem 0; }
+
+  /* BUDGET BAR */
+  .budget-bar { height:6px; background:#1a2a1a; border-radius:3px; overflow:hidden; }
+  .budget-fill { height:100%; border-radius:3px; transition:width 0.4s; }
+
+  @media(max-width:600px) {
+    .main-content { padding:1rem; }
+    .pitch { max-width:100%; }
+    .pitch-slot { width:58px; }
+    .pitch-slot .slot-circle { width:44px; height:44px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LANDING -->
+<div id="landing">
+  <div class="gea-logo">GEA</div>
+  <div class="gea-sub">Fantasy DT · Torneo Interno</div>
+  <div class="roles-grid">
+    <div class="role-btn" onclick="enterRole('admin')">
+      <div class="icon">⚙️</div>
+      <div class="label">Admin</div>
+      <div class="desc">Gestionar jugadores y partidos</div>
+    </div>
+    <div class="role-btn" onclick="enterRole('veedor')">
+      <div class="icon">📋</div>
+      <div class="label">Veedor</div>
+      <div class="desc">Puntuar jugadores en partidos</div>
+    </div>
+    <div class="role-btn" onclick="enterRole('dt')">
+      <div class="icon">🏆</div>
+      <div class="label">DT</div>
+      <div class="desc">Armar mi equipo y ver puntos</div>
+    </div>
+  </div>
+  <div style="margin-top:2rem;font-size:0.68rem;color:var(--muted);text-align:center;opacity:0.4;letter-spacing:0.05em">
+    GEBA Fantasy DT · Torneo Interno
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-logo">GEBA</div>
+    <div style="display:flex;align-items:center;gap:0.75rem;">
+      <div class="topbar-role" id="topbar-role-label"></div>
+      <button class="back-btn" onclick="goBack()">← Salir</button>
+    </div>
+  </div>
+  <div class="main-content" id="main-content"></div>
+</div>
+
+<!-- LOADING SCREEN -->
+<div id="loading-screen" style="display:flex;position:fixed;inset:0;background:#0A0F0A;z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:1rem">
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:2.5rem;color:#00C853;letter-spacing:0.15em">GEBA FANTASY DT</div>
+  <div style="width:40px;height:40px;border:3px solid #2a3d2a;border-top-color:#00C853;border-radius:50%;animation:spin 0.8s linear infinite"></div>
+  <div style="color:#6A8F6A;font-size:0.85rem">Conectando...</div>
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
+
+<div id="modal-container"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+// ==================== FIREBASE ====================
+const firebaseConfig = {
+  apiKey: "AIzaSyBPy2LD8aAmHbGTYMriE-Pb8X1Ii9eA2Qo",
+  authDomain: "geba-dt.firebaseapp.com",
+  projectId: "geba-dt",
+  storageBucket: "geba-dt.firebasestorage.app",
+  messagingSenderId: "647924079075",
+  appId: "1:647924079075:web:a9c3b14d6f202c220968d6"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const DB_DOC = db.collection('gea').doc('data');
+
+// ==================== STATE ====================
+const BUDGET = 70; // millones
+
+let state = {
+  role: null,
+  players: [],
+  teams: [],
+  matches: [],
+  scores: {},
+  dts: [],
+  dtTeams: {},
+  dtCaptains: {},
+  activeFecha: null,
+  mercadoAbierto: true,
+  transfers: [],
+};
+
+let saveTimeout = null;
+function save() {
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(() => {
+    DB_DOC.set({
+      players:        state.players,
+      teams:          state.teams,
+      matches:        state.matches,
+      scores:         state.scores,
+      dts:            state.dts,
+      dtTeams:        state.dtTeams,
+      dtCaptains:     state.dtCaptains,
+      activeFecha:    state.activeFecha || null,
+      mercadoAbierto: state.mercadoAbierto !== false,
+      transfers:      state.transfers || [],
+    }).catch(e => console.error('Error guardando:', e));
+  }, 400);
+}
+
+// Migrar datos de localStorage a Firebase (solo primera vez)
+async function migrateFromLocalStorage(remoteData) {
+  const hasLocal = localStorage.getItem('gea_players');
+  const hasRemote = remoteData && remoteData.players && remoteData.players.length > 0;
+  if (!hasLocal) return false;
+  if (hasRemote) { localStorage.clear(); return false; }
+  state.players    = JSON.parse(localStorage.getItem('gea_players') || '[]');
+  state.teams      = JSON.parse(localStorage.getItem('gea_teams') || '[]');
+  state.matches    = JSON.parse(localStorage.getItem('gea_matches') || '[]');
+  state.scores     = JSON.parse(localStorage.getItem('gea_scores') || '{}');
+  state.dts        = JSON.parse(localStorage.getItem('gea_dts') || '[]');
+  state.dtTeams    = JSON.parse(localStorage.getItem('gea_dtTeams') || '{}');
+  state.dtCaptains = JSON.parse(localStorage.getItem('gea_dtCaptains') || '{}');
+  state.activeFecha= localStorage.getItem('gea_activeFecha') || null;
+  await DB_DOC.set({
+    players: state.players, teams: state.teams, matches: state.matches,
+    scores: state.scores, dts: state.dts, dtTeams: state.dtTeams,
+    dtCaptains: state.dtCaptains, activeFecha: state.activeFecha || null,
+  });
+  localStorage.clear();
+  return true;
+}
+
+async function initApp() {
+  document.getElementById('loading-screen').style.display = 'flex';
+  document.getElementById('landing').style.display = 'none';
+  try {
+    const snap = await DB_DOC.get();
+    const remoteData = snap.exists ? snap.data() : null;
+    const migrated = await migrateFromLocalStorage(remoteData);
+    if (!migrated && remoteData) {
+      state.players       = remoteData.players    || [];
+      state.teams         = remoteData.teams      || [];
+      state.matches       = remoteData.matches    || [];
+      state.scores        = remoteData.scores     || {};
+      state.dts           = remoteData.dts        || [];
+      state.dtTeams       = remoteData.dtTeams    || {};
+      state.dtCaptains    = remoteData.dtCaptains || {};
+      state.activeFecha   = remoteData.activeFecha|| null;
+      state.mercadoAbierto= remoteData.mercadoAbierto !== false;
+      state.transfers     = remoteData.transfers  || [];
+    }
+    purgeOrphanScores();
+    // Escuchar cambios en tiempo real
+    DB_DOC.onSnapshot((snap) => {
+      if (!snap.exists) return;
+      const d = snap.data();
+      state.players       = d.players    || [];
+      state.teams         = d.teams      || [];
+      state.matches       = d.matches    || [];
+      state.scores        = d.scores     || {};
+      state.dts           = d.dts        || [];
+      state.dtTeams       = d.dtTeams    || {};
+      state.dtCaptains    = d.dtCaptains || {};
+      state.activeFecha   = d.activeFecha|| null;
+      state.mercadoAbierto= d.mercadoAbierto !== false;
+      state.transfers     = d.transfers  || [];
+      refreshCurrentView();
+    });
+  } catch(e) {
+    console.error('Error Firebase:', e);
+    document.getElementById('loading-screen').innerHTML = `
+      <div style="text-align:center;color:#FF1744;padding:2rem">
+        <div style="font-size:2rem;margin-bottom:1rem">⚠️</div>
+        <div style="font-size:1rem">Error de conexión.<br>Verificá tu internet e intentá de nuevo.</div>
+        <button onclick="location.reload()" style="margin-top:1.5rem;padding:0.6rem 1.5rem;background:#00C853;color:#000;border:none;border-radius:4px;font-size:0.9rem;cursor:pointer">Reintentar</button>
+      </div>`;
+    return;
+  }
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('landing').style.display = 'flex';
+}
+
+function refreshCurrentView() {
+  if (!state.role) return;
+  if (state.role === 'admin') renderAdmin(currentTab);
+  if (state.role === 'veedor') renderVeedor(currentTab);
+  if (state.role === 'dt' && currentDtId) renderDt(dtTab);
+}
+
+// ==================== STATE INIT ====================
+
+// Elimina puntajes de partidos que ya no existen
+function purgeOrphanScores() {
+  const validMatchIds = new Set(state.matches.map(m => m.id));
+  let changed = false;
+  for (const playerId in state.scores) {
+    for (const matchId in state.scores[playerId]) {
+      if (!validMatchIds.has(matchId)) {
+        delete state.scores[playerId][matchId];
+        changed = true;
+      }
+    }
+  }
+  if (changed) save();
+}
+
+// Ejecutar al iniciar
+window.addEventListener("load", initApp);
+
+// ==================== SCORING SYSTEM ====================
+// Calificación Clarín es especial (1-10, no contable como las demás)
+// Se guarda en scores como { clarin: N }
+const ACTIONS = [
+  { id:'figura',        label:'Figura de la cancha',          icon:'⭐', pts:4,   pos:true  },
+  { id:'gol_penal',     label:'Gol de penal',                 icon:'🎯', pts:3,   pos:true  },
+  { id:'gol_oro',       label:'Gol de Oro',                   icon:'🏅', pts:5,   pos:true  },
+  { id:'gol_del',       label:'Gol delantero (jugada)',        icon:'⚽', pts:4,   pos:true  },
+  { id:'gol_vol',       label:'Gol volante (jugada)',          icon:'⚽', pts:6,   pos:true  },
+  { id:'gol_def',       label:'Gol defensor (jugada)',         icon:'⚽', pts:9,   pos:true  },
+  { id:'gol_arq',       label:'Gol arquero (jugada)',          icon:'⚽', pts:12,  pos:true  },
+  { id:'valla_arq',     label:'Valla invicta (arquero)',       icon:'🔒', pts:3,   pos:true  },
+  { id:'valla_def',     label:'Valla invicta (defensor)',      icon:'🔒', pts:2,   pos:true  },
+  { id:'penal_atajado', label:'Penal atajado',                 icon:'🧤', pts:4,   pos:true  },
+  { id:'gol_recibido',  label:'Gol recibido (arquero)',        icon:'😓', pts:-1,  pos:false },
+  { id:'gol_contra',    label:'Gol en contra',                 icon:'😬', pts:-2,  pos:false },
+  { id:'amarilla',      label:'Tarjeta amarilla',              icon:'🟨', pts:-2,  pos:false },
+  { id:'roja',          label:'Tarjeta roja',                  icon:'🟥', pts:-4,  pos:false },
+  { id:'penal_errado',  label:'Penal errado',                  icon:'❌', pts:-4,  pos:false },
+];
+
+// Puntos de un jugador en UNA fecha específica
+function calcPlayerMatchPts(playerId, matchId) {
+  const actions = (state.scores[playerId] || {})[matchId] || {};
+  let total = 0;
+  // Calificación Clarín base (1-10)
+  if (actions.clarin) total += actions.clarin;
+  for (const actionId in actions) {
+    if (actionId === 'clarin') continue;
+    const action = ACTIONS.find(a => a.id === actionId);
+    if (action) total += action.pts * (actions[actionId] || 0);
+  }
+  return total;
+}
+
+// Puntos totales acumulados de un jugador (todas las fechas)
+function calcPlayerTotalPts(playerId) {
+  const playerScores = state.scores[playerId] || {};
+  let total = 0;
+  for (const matchId in playerScores) {
+    total += calcPlayerMatchPts(playerId, matchId);
+  }
+  return total;
+}
+
+// Puntos de un jugador en la fecha activa (suma todos los partidos de esa fecha)
+function calcPlayerActivePts(playerId) {
+  if (!state.activeFecha) return 0;
+  // activeFecha es un número de fecha ej "1", "2"
+  // los partidos de esa fecha son los que tienen fechaNum === activeFecha
+  const matchesOfFecha = state.matches.filter(m => m.fechaNum === state.activeFecha);
+  return matchesOfFecha.reduce((sum, m) => sum + calcPlayerMatchPts(playerId, m.id), 0);
+}
+
+// Puntos del DT = suma histórica total de sus jugadores (capitán x2)
+function calcDtPts(dtId) {
+  const roster = state.dtTeams[dtId] || [];
+  const captainId = state.dtCaptains[dtId] || null;
+  return roster.reduce((sum, pid) => {
+    const pts = calcPlayerTotalPts(pid);
+    return sum + (pid === captainId ? pts * 2 : pts);
+  }, 0);
+}
+
+function getBadgeClass(pos) {
+  if (!pos) return '';
+  const p = pos.toLowerCase();
+  if (p === 'arquero') return 'badge-arq';
+  if (p === 'defensor') return 'badge-def';
+  if (p === 'mediocampista') return 'badge-med';
+  if (p === 'delantero') return 'badge-del';
+  return '';
+}
+
+function posEmoji(pos) {
+  if (!pos) return '👤';
+  const p = pos.toLowerCase();
+  if (p === 'arquero') return '🧤';
+  if (p === 'defensor') return '🛡️';
+  if (p === 'mediocampista') return '⚙️';
+  if (p === 'delantero') return '⚡';
+  return '👤';
+}
+
+// ==================== NAVIGATION ====================
+let currentDtId = null;
+let currentTab = null;
+
+const PASSWORDS = { admin: 'geba26' };
+
+function enterRole(role) {
+  if (role === 'dt') { showDtLogin(); return; }
+  if (role === 'admin') { showAdminLogin(); return; }
+  // veedor entra directo
+  state.role = role;
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('topbar-role-label').textContent = 'Veedor';
+  renderVeedor();
+}
+
+function showAdminLogin() {
+  document.getElementById('modal-container').innerHTML = `
+    <div class="modal-overlay" onclick="closeModal()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-title">⚙️ Acceso Administrador</div>
+        <div class="form-group" style="margin-bottom:1rem">
+          <label>Contraseña</label>
+          <input type="password" id="admin-pass" placeholder="Contraseña" onkeydown="if(event.key==='Enter')checkAdminPass()">
+        </div>
+        <div id="admin-pass-alert"></div>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+          <button class="btn btn-primary" onclick="checkAdminPass()">Entrar</button>
+        </div>
+      </div>
+    </div>`;
+  setTimeout(() => document.getElementById('admin-pass')?.focus(), 100);
+}
+
+function checkAdminPass() {
+  const pass = document.getElementById('admin-pass').value;
+  if (pass === PASSWORDS.admin) {
+    closeModal();
+    state.role = 'admin';
+    document.getElementById('landing').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('topbar-role-label').textContent = 'Administrador';
+    renderAdmin();
+  } else {
+    document.getElementById('admin-pass-alert').innerHTML = '<div class="alert alert-error" style="margin-top:0.5rem">Contraseña incorrecta</div>';
+  }
+}
+
+function goBack() {
+  state.role = null;
+  currentDtId = null;
+  document.getElementById('landing').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  closeModal();
+}
+
+function showDtLogin() {
+  const html = `
+    <div class="modal-overlay" onclick="closeModal()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-title">🏆 Acceso DT</div>
+        <div style="display:flex;gap:0.5rem;margin-bottom:1.25rem">
+          <button class="btn btn-secondary" id="tab-login-btn" onclick="switchDtAuthTab('login')" style="flex:1">Ingresar</button>
+          <button class="btn btn-secondary" id="tab-register-btn" onclick="switchDtAuthTab('register')" style="flex:1">Registrarme</button>
+        </div>
+        <div id="dt-auth-content"></div>
+        <div id="dt-auth-alert"></div>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+          <button class="btn btn-primary" id="dt-auth-submit">Entrar</button>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('modal-container').innerHTML = html;
+  switchDtAuthTab('login');
+}
+
+function switchDtAuthTab(tab) {
+  const loginBtn = document.getElementById('tab-login-btn');
+  const registerBtn = document.getElementById('tab-register-btn');
+  const content = document.getElementById('dt-auth-content');
+  const submitBtn = document.getElementById('dt-auth-submit');
+
+  loginBtn.className = `btn btn-${tab==='login'?'primary':'secondary'}`;
+  registerBtn.className = `btn btn-${tab==='register'?'primary':'secondary'}`;
+
+  if (tab === 'login') {
+    submitBtn.textContent = 'Entrar';
+    submitBtn.onclick = loginDt;
+    content.innerHTML = `
+      <div class="form-group" style="margin-bottom:0.75rem">
+        <label>Tu nombre de DT</label>
+        <input id="dt-auth-name" placeholder="Como te registraste">
+      </div>
+      <div class="form-group" style="margin-bottom:1rem">
+        <label>Contraseña</label>
+        <input type="password" id="dt-auth-pass" placeholder="Tu contraseña" onkeydown="if(event.key==='Enter')loginDt()">
+      </div>`;
+  } else {
+    submitBtn.textContent = 'Crear cuenta';
+    submitBtn.onclick = registerDt;
+    content.innerHTML = `
+      <div class="form-group" style="margin-bottom:0.75rem">
+        <label>Tu nombre de DT</label>
+        <input id="dt-auth-name" placeholder="Ej: Juan Pérez">
+      </div>
+      <div class="form-group" style="margin-bottom:0.75rem">
+        <label>Contraseña</label>
+        <input type="password" id="dt-auth-pass" placeholder="Elegí una contraseña">
+      </div>
+      <div class="form-group" style="margin-bottom:1rem">
+        <label>Repetir contraseña</label>
+        <input type="password" id="dt-auth-pass2" placeholder="Repetí tu contraseña" onkeydown="if(event.key==='Enter')registerDt()">
+      </div>`;
+  }
+}
+
+function registerDt() {
+  const name = document.getElementById('dt-auth-name').value.trim();
+  const pass = document.getElementById('dt-auth-pass').value;
+  const pass2 = document.getElementById('dt-auth-pass2').value;
+  const alert = document.getElementById('dt-auth-alert');
+  if (!name) { alert.innerHTML = `<div class="alert alert-error">Ingresá tu nombre</div>`; return; }
+  if (!pass || pass.length < 3) { alert.innerHTML = `<div class="alert alert-error">La contraseña debe tener al menos 3 caracteres</div>`; return; }
+  if (pass !== pass2) { alert.innerHTML = `<div class="alert alert-error">Las contraseñas no coinciden</div>`; return; }
+  if (state.dts.find(d => d.name.toLowerCase() === name.toLowerCase())) {
+    alert.innerHTML = `<div class="alert alert-error">Ya existe un DT con ese nombre</div>`; return;
+  }
+  const newDt = { id: Date.now().toString(), name, password: pass };
+  state.dts.push(newDt);
+  save();
+  enterDtSession(newDt);
+}
+
+function loginDt() {
+  const name = document.getElementById('dt-auth-name').value.trim();
+  const pass = document.getElementById('dt-auth-pass').value;
+  const alert = document.getElementById('dt-auth-alert');
+  const dt = state.dts.find(d => d.name.toLowerCase() === name.toLowerCase());
+  if (!dt) { alert.innerHTML = `<div class="alert alert-error">No existe un DT con ese nombre</div>`; return; }
+  if (dt.password !== pass) { alert.innerHTML = `<div class="alert alert-error">Contraseña incorrecta</div>`; return; }
+  enterDtSession(dt);
+}
+
+function enterDtSession(dt) {
+  currentDtId = dt.id;
+  state.role = 'dt';
+  closeModal();
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('topbar-role-label').textContent = `DT: ${dt.name}`;
+  renderDt();
+}
+
+function closeModal() {
+  document.getElementById('modal-container').innerHTML = '';
+}
+
+// ==================== ADMIN ====================
+function renderAdmin(tab) {
+  currentTab = tab || 'jugadores';
+  const c = document.getElementById('main-content');
+  c.innerHTML = `
+    <div class="tabs">
+      <button class="tab ${currentTab==='jugadores'?'active':''}" onclick="renderAdmin('jugadores')">👥 Jugadores</button>
+      <button class="tab ${currentTab==='equipos'?'active':''}" onclick="renderAdmin('equipos')">🏅 Equipos</button>
+      <button class="tab ${currentTab==='partidos'?'active':''}" onclick="renderAdmin('partidos')">📅 Partidos</button>
+      <button class="tab ${currentTab==='dts'?'active':''}" onclick="renderAdmin('dts')">🏆 DTs</button>
+      <button class="tab ${currentTab==='mercado-admin'?'active':''}" onclick="renderAdmin('mercado-admin')">💰 Mercado</button>
+      <button class="tab ${currentTab==='backup'?'active':''}" onclick="renderAdmin('backup')">💾 Backup</button>
+    </div>
+    <div id="tab-content"></div>`;
+  if (currentTab === 'jugadores') renderAdminJugadores();
+  if (currentTab === 'equipos')   renderAdminEquipos();
+  if (currentTab === 'partidos')  renderAdminPartidos();
+  if (currentTab === 'dts')          renderAdminDts();
+  if (currentTab === 'mercado-admin') renderAdminMercado();
+  if (currentTab === 'backup')        renderAdminBackup();
+}
+
+function renderAdminBackup() {
+  const tc = document.getElementById('tab-content');
+  tc.innerHTML = `
+    <div class="card">
+      <div class="card-title">📤 Exportar datos</div>
+      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:1rem">Guardá una copia de toda la base de datos. Hacé esto <strong style="color:var(--text)">antes</strong> de actualizar el archivo HTML.</p>
+      <button class="btn btn-primary" onclick="exportData()">⬇️ Descargar backup</button>
+    </div>
+    <div class="card">
+      <div class="card-title">📥 Importar datos</div>
+      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:1rem">Restaurá un backup guardado anteriormente. <strong style="color:#FF1744">Esto reemplaza todos los datos actuales.</strong></p>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(this)">
+      <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()">📂 Cargar archivo de backup</button>
+      <div id="import-alert"></div>
+    </div>
+    <div class="card" style="border-color:#FF174433">
+      <div class="card-title" style="color:#FF1744">🧹 Limpiar puntajes huérfanos</div>
+      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:1rem">Elimina puntajes de partidos que ya no existen. Esto se hace automático al abrir la app, pero podés forzarlo acá.</p>
+      <button class="btn btn-secondary" onclick="purgeOrphanScores();document.getElementById('purge-alert').innerHTML='<div class=\'alert alert-success\' style=\'margin-top:0.5rem\'>✓ Puntajes huérfanos eliminados</div>'">🧹 Purgar ahora</button>
+      <div id="purge-alert"></div>
+    </div>
+    <div class="card" style="border-color:#FF174433">
+      <div class="card-title" style="color:#FF1744">⚠️ Por qué pasa esto</div>
+      <p style="font-size:0.83rem;color:var(--muted);line-height:1.6">Cada archivo HTML guarda los datos en el navegador (<em>localStorage</em>). Cuando abrís un archivo nuevo o desde otra URL, los datos no se transfieren automáticamente. <br><br>La solución definitiva es migrar a la versión online, donde los datos viven en la nube y no dependen del archivo.</p>
+    </div>`;
+}
+
+function exportData() {
+  const data = {
+    players:     state.players,
+    teams:       state.teams,
+    matches:     state.matches,
+    scores:      state.scores,
+    dts:         state.dts,
+    dtTeams:     state.dtTeams,
+    dtCaptains:  state.dtCaptains,
+    activeFecha: state.activeFecha,
+    exportedAt:  new Date().toISOString(),
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `gea-backup-${new Date().toLocaleDateString('es-AR').replace(/\//g,'-')}.json`;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 200);
+}
+
+function importData(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.players || !data.teams) throw new Error('Archivo inválido');
+      state.players    = data.players    || [];
+      state.teams      = data.teams      || [];
+      state.matches    = data.matches    || [];
+      state.scores     = data.scores     || {};
+      state.dts        = data.dts        || [];
+      state.dtTeams    = data.dtTeams    || {};
+      state.dtCaptains = data.dtCaptains || {};
+      state.activeFecha= data.activeFecha|| null;
+      save();
+      document.getElementById('import-alert').innerHTML = `<div class="alert alert-success" style="margin-top:0.75rem">✓ Datos importados correctamente — ${state.players.length} jugadores, ${state.teams.length} equipos, ${state.dts.length} DTs.</div>`;
+      setTimeout(() => renderAdmin('jugadores'), 1500);
+    } catch(err) {
+      document.getElementById('import-alert').innerHTML = `<div class="alert alert-error" style="margin-top:0.75rem">❌ Error al importar: archivo inválido o corrupto.</div>`;
+    }
+  };
+  reader.readAsText(file);
+}
+
+let adminJugadorTeamFilter = 'todos';
+
+function renderAdminJugadores(teamFilter) {
+  if (teamFilter !== undefined) adminJugadorTeamFilter = teamFilter;
+  const tc = document.getElementById('tab-content');
+  const players = adminJugadorTeamFilter === 'todos'
+    ? state.players
+    : state.players.filter(p => p.teamId === adminJugadorTeamFilter);
+
+  const teamChips = `
+    <div class="filter-chip ${adminJugadorTeamFilter==='todos'?'active':''}" onclick="renderAdminJugadores('todos')">Todos</div>
+    ${state.teams.map(t => `
+      <div class="filter-chip ${adminJugadorTeamFilter===t.id?'active':''}" onclick="renderAdminJugadores('${t.id}')">${t.name}</div>
+    `).join('')}
+  `;
+
+  tc.innerHTML = `
+    <div class="card">
+      <div class="card-title">➕ Agregar Jugador</div>
+      <div class="form-row">
+        <div class="form-group"><label>Nombre</label><input id="pname" placeholder="Nombre y apellido"></div>
+        <div class="form-group"><label>Equipo</label>
+          <select id="pteam">
+            <option value="">Sin equipo</option>
+            ${state.teams.map(t=>`<option value="${t.id}">${t.name}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group"><label>Posición</label>
+          <select id="ppos">
+            <option value="Arquero">Arquero</option>
+            <option value="Defensor">Defensor</option>
+            <option value="Mediocampista">Mediocampista</option>
+            <option value="Delantero">Delantero</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Valor ($M)</label><input id="pval" type="number" min="0" max="99" placeholder="Ej: 12"></div>
+      </div>
+      <button class="btn btn-primary" onclick="addPlayer()">Agregar jugador</button>
+      <div id="player-alert"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">👥 Jugadores registrados <span style="color:var(--muted);font-size:0.85rem;">(${state.players.length})</span></div>
+      <div style="font-size:0.72rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.4rem">Filtrar por equipo</div>
+      <div class="filter-bar" style="margin-bottom:1rem">${teamChips}</div>
+      ${players.length === 0 ? `<div class="empty-state"><div class="empty-icon">👤</div><p>No hay jugadores en este equipo</p></div>` : `
+      <table class="data-table">
+        <thead><tr><th>Nombre</th><th>Equipo</th><th>Posición</th><th>Valor</th><th></th></tr></thead>
+        <tbody>
+          ${players.map(p => {
+            const team = state.teams.find(t => t.id === p.teamId);
+            return `<tr>
+              <td>${p.name}</td>
+              <td>${team ? team.name : '<span style="color:var(--muted)">-</span>'}</td>
+              <td><span class="badge ${getBadgeClass(p.pos)}">${p.pos}</span></td>
+              <td style="color:var(--gold);font-family:'Barlow Condensed',sans-serif;font-size:1rem;">${p.valor ? '$'+p.valor+'M' : '—'}</td>
+              <td style="display:flex;gap:0.3rem">
+                <button class="btn btn-secondary btn-sm" onclick="openEditPlayer('${p.id}')">✏️</button>
+                <button class="btn btn-danger btn-sm" onclick="deletePlayer('${p.id}')">✕</button>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>`}
+    </div>`;
+}
+
+function openEditPlayer(id) {
+  const p = state.players.find(pl => pl.id === id);
+  if (!p) return;
+  const html = `
+    <div class="modal-overlay" onclick="closeModal()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-title">✏️ Editar Jugador</div>
+        <div class="form-row">
+          <div class="form-group"><label>Nombre</label><input id="edit-pname" value="${p.name}"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Equipo</label>
+            <select id="edit-pteam">
+              <option value="">Sin equipo</option>
+              ${state.teams.map(t=>`<option value="${t.id}" ${t.id===p.teamId?'selected':''}>${t.name}</option>`).join('')}
+            </select>
+          </div>
+          <div class="form-group"><label>Posición</label>
+            <select id="edit-ppos">
+              ${['Arquero','Defensor','Mediocampista','Delantero'].map(pos=>
+                `<option value="${pos}" ${pos===p.pos?'selected':''}>${pos}</option>`
+              ).join('')}
+            </select>
+          </div>
+          <div class="form-group"><label>Valor ($M)</label><input id="edit-pval" type="number" min="0" max="99" value="${p.valor||0}"></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+          <button class="btn btn-primary" onclick="saveEditPlayer('${id}')">Guardar cambios</button>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('modal-container').innerHTML = html;
+}
+
+function saveEditPlayer(id) {
+  const p = state.players.find(pl => pl.id === id);
+  if (!p) return;
+  p.name = document.getElementById('edit-pname').value.trim() || p.name;
+  p.teamId = document.getElementById('edit-pteam').value;
+  p.pos = document.getElementById('edit-ppos').value;
+  p.valor = parseFloat(document.getElementById('edit-pval').value) || 0;
+  save();
+  closeModal();
+  renderAdmin('jugadores');
+}
+
+function addPlayer() {
+  const name = document.getElementById('pname').value.trim();
+  const teamId = document.getElementById('pteam').value;
+  const pos = document.getElementById('ppos').value;
+  const valor = parseFloat(document.getElementById('pval').value) || 0;
+  if (!name) { document.getElementById('player-alert').innerHTML = `<div class="alert alert-error" style="margin-top:0.5rem">Ingresá un nombre</div>`; return; }
+  state.players.push({ id: Date.now().toString(), name, teamId, pos, valor });
+  save();
+  document.getElementById('player-alert').innerHTML = `<div class="alert alert-success" style="margin-top:0.5rem">✓ ${name} agregado</div>`;
+  document.getElementById('pname').value = '';
+  setTimeout(() => renderAdmin('jugadores'), 800);
+}
+
+function deletePlayer(id) {
+  const p = state.players.find(pl => pl.id === id);
+  const html = `<div class="modal-overlay"><div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">⚠️ Eliminar jugador</div>
+    <p style="margin-bottom:1rem;color:var(--muted);font-size:0.9rem">¿Eliminar a <strong style="color:var(--text)">${p?.name}</strong>? Esta acción no se puede deshacer.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-danger" onclick="confirmDeletePlayer('${id}')">Eliminar</button>
+    </div>
+  </div></div>`;
+  document.getElementById('modal-container').innerHTML = html;
+}
+function confirmDeletePlayer(id) {
+  state.players = state.players.filter(p => p.id !== id);
+  for (const dtId in state.dtTeams) {
+    state.dtTeams[dtId] = state.dtTeams[dtId].filter(pid => pid !== id);
+  }
+  save(); closeModal(); renderAdmin('jugadores');
+}
+
+function renderAdminEquipos() {
+  const tc = document.getElementById('tab-content');
+  tc.innerHTML = `
+    <div class="card">
+      <div class="card-title">➕ Agregar Equipo</div>
+      <div class="form-row">
+        <div class="form-group"><label>Nombre del equipo</label><input id="tname" placeholder="Ej: Los Piratas"></div>
+      </div>
+      <button class="btn btn-primary" onclick="addTeam()">Agregar equipo</button>
+      <div id="team-alert"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🏅 Equipos (${state.teams.length})</div>
+      ${state.teams.length === 0 ? `<div class="empty-state"><div class="empty-icon">🏅</div><p>No hay equipos registrados</p></div>` : `
+      <table class="data-table">
+        <thead><tr><th>Equipo</th><th>Jugadores</th><th></th></tr></thead>
+        <tbody>
+          ${state.teams.map(t => {
+            const count = state.players.filter(p => p.teamId === t.id).length;
+            return `<tr>
+              <td><strong>${t.name}</strong></td>
+              <td>${count} jugadores</td>
+              <td><button class="btn btn-danger btn-sm" onclick="deleteTeam('${t.id}')">✕</button></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>`}
+    </div>`;
+}
+
+function addTeam() {
+  const name = document.getElementById('tname').value.trim();
+  if (!name) return;
+  state.teams.push({ id: Date.now().toString(), name });
+  save();
+  document.getElementById('team-alert').innerHTML = `<div class="alert alert-success" style="margin-top:0.5rem">✓ ${name} agregado</div>`;
+  document.getElementById('tname').value = '';
+  setTimeout(() => renderAdmin('equipos'), 600);
+}
+
+function deleteTeam(id) {
+  const t = state.teams.find(tm => tm.id === id);
+  const html = `<div class="modal-overlay"><div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">⚠️ Eliminar equipo</div>
+    <p style="margin-bottom:1rem;color:var(--muted);font-size:0.9rem">¿Eliminar <strong style="color:var(--text)">${t?.name}</strong>?</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-danger" onclick="confirmDeleteTeam('${id}')">Eliminar</button>
+    </div>
+  </div></div>`;
+  document.getElementById('modal-container').innerHTML = html;
+}
+function confirmDeleteTeam(id) {
+  state.teams = state.teams.filter(t => t.id !== id);
+  state.players.forEach(p => { if (p.teamId === id) p.teamId = ''; });
+  save(); closeModal(); renderAdmin('equipos');
+}
+
+function renderAdminPartidos() {
+  const tc = document.getElementById('tab-content');
+  const fechaOptions = Array.from({length:20},(_,i)=>`<option value="${i+1}">Fecha ${i+1}</option>`).join('');
+  const teamOptions = `<option value="">-- Equipo --</option>` + state.teams.map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
+
+  // Fechas únicas cargadas
+  const fechasUnicas = [...new Set(state.matches.map(m => m.fechaNum).filter(Boolean))].sort((a,b)=>Number(a)-Number(b));
+  const activaLabel = state.activeFecha ? `Fecha ${state.activeFecha}` : null;
+
+  // Partidos sin equipos asignados (migracion)
+  const sinEquipos = state.matches.filter(m => !m.localId || !m.visitaId);
+  const migracionHtml = sinEquipos.length === 0 ? '' : `
+    <div class="card" style="border-color:#FF6B3555">
+      <div class="card-title" style="color:#FF6B35">🔧 Partidos sin equipos asignados</div>
+      <p style="font-size:0.82rem;color:var(--muted);margin-bottom:1rem">Estos partidos fueron cargados antes. Asignales los equipos para que el veedor solo vea los jugadores del partido.</p>
+      ${sinEquipos.map(m => `
+        <div style="background:#0d1f0d;border:1px solid #2a3d2a;border-radius:4px;padding:0.75rem;margin-bottom:0.75rem">
+          <div style="font-size:0.88rem;font-weight:700;color:var(--text);margin-bottom:0.6rem">${m.desc}</div>
+          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">
+            <select id="mig-local-${m.id}" style="flex:1;min-width:130px;background:#192319;border:1px solid #2a3d2a;color:#E8F5E9;padding:0.4rem 0.6rem;border-radius:3px;font-size:0.82rem">
+              <option value="">Local</option>
+              ${state.teams.map(t=>`<option value="${t.id}" ${t.id===m.localId?'selected':''}>${t.name}</option>`).join('')}
+            </select>
+            <span style="color:var(--muted);font-size:0.8rem">vs</span>
+            <select id="mig-visita-${m.id}" style="flex:1;min-width:130px;background:#192319;border:1px solid #2a3d2a;color:#E8F5E9;padding:0.4rem 0.6rem;border-radius:3px;font-size:0.82rem">
+              <option value="">Visitante</option>
+              ${state.teams.map(t=>`<option value="${t.id}" ${t.id===m.visitaId?'selected':''}>${t.name}</option>`).join('')}
+            </select>
+            <button class="btn btn-primary btn-sm" onclick="migrateMatch('${m.id}')">Guardar</button>
+          </div>
+          <div id="mig-alert-${m.id}"></div>
+        </div>
+      `).join('')}
+    </div>`;
+
+  tc.innerHTML = migracionHtml + `
+    <div class="card" style="border-color:${state.activeFecha?'#00C85355':'#2a3d2a'}">
+      <div class="card-title">📍 Fecha activa</div>
+      <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.9rem">Activá una fecha completa. Los DTs verán los puntos de <strong style="color:var(--text)">todos los partidos de esa fecha</strong> en su cancha.</p>
+      ${fechasUnicas.length === 0 ? `<div class="alert alert-info">Cargá partidos primero para activar una fecha.</div>` : `
+      <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap">
+        <select id="fecha-activa-sel" style="flex:1;min-width:180px;background:#192319;border:1px solid #2a3d2a;color:#E8F5E9;padding:0.5rem 0.7rem;border-radius:3px;font-size:0.9rem">
+          <option value="">— Sin fecha activa —</option>
+          ${fechasUnicas.map(f=>`<option value="${f}" ${f===state.activeFecha?'selected':''}>Fecha ${f} (${state.matches.filter(m=>m.fechaNum===f).length} partidos)</option>`).join('')}
+        </select>
+        <button class="btn btn-primary" onclick="setActiveFecha()">Activar</button>
+        ${state.activeFecha ? `<button class="btn btn-secondary btn-sm" onclick="setActiveFechaNull()">Desactivar</button>` : ''}
+      </div>
+      ${state.activeFecha
+        ? `<div class="alert alert-success" style="margin-top:0.75rem">✓ Activa: <strong>Fecha ${state.activeFecha}</strong> — ${state.matches.filter(m=>m.fechaNum===state.activeFecha).length} partidos incluidos</div>`
+        : `<div class="alert alert-info" style="margin-top:0.75rem">Sin fecha activa — los DTs verán 0 pts hasta que actives una.</div>`}
+      `}
+    </div>
+
+    <div class="card">
+      <div class="card-title">➕ Cargar Partido</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Fecha</label>
+          <select id="mfecha">
+            <option value="">-- Fecha --</option>
+            ${fechaOptions}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Local</label>
+          <select id="mlocal">${teamOptions}</select>
+        </div>
+        <div class="form-group">
+          <label>Visitante</label>
+          <select id="mvisita">${teamOptions}</select>
+        </div>
+        <div class="form-group">
+          <label>Día</label>
+          <input id="mdate" type="date">
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="addMatch()">Agregar partido</button>
+      <div id="match-alert"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📅 Partidos (${state.matches.length})</div>
+      ${state.matches.length === 0 ? `<div class="empty-state"><div class="empty-icon">📅</div><p>No hay partidos cargados</p></div>` : `
+      ${buildPartidosHtml(fechasUnicas)}
+      `}
+    </div>`;
+}
+
+function buildPartidosHtml(fechasUnicas) {
+  const sinFecha = state.matches.filter(m => !m.fechaNum);
+  const grupos = fechasUnicas.map(f => {
+    const matchesF = state.matches.filter(m => m.fechaNum === f);
+    const isActiva = f === state.activeFecha;
+    return `<div style="margin-bottom:0.5rem">
+      <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:${isActiva?'#00C853':'#6A8F6A'};padding:0.4rem 0;display:flex;align-items:center;gap:0.5rem">
+        ${isActiva?'● ':''}FECHA ${f}
+        ${isActiva?'<span style="font-size:0.68rem;color:#00C853;background:#00C85322;padding:0.1rem 0.5rem;border-radius:2px">ACTIVA</span>':''}
+      </div>
+      <table class="data-table" style="margin-bottom:0.5rem"><tbody>
+        ${matchesF.map(m=>`<tr>
+          <td style="padding:0.45rem 0.7rem">${m.desc}</td>
+          <td style="color:var(--muted);padding:0.45rem 0.7rem">${m.date||'—'}</td>
+          <td style="padding:0.45rem 0.7rem"><button class="btn btn-danger btn-sm" onclick="deleteMatch('${m.id}')">✕</button></td>
+        </tr>`).join('')}
+      </tbody></table>
+    </div>`;
+  });
+  if (sinFecha.length > 0) {
+    grupos.push(`<div style="margin-bottom:0.5rem">
+      <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#FF6B35;padding:0.4rem 0">⚠️ SIN FECHA ASIGNADA</div>
+      <table class="data-table" style="margin-bottom:0.5rem"><tbody>
+        ${sinFecha.map(m=>`<tr>
+          <td style="padding:0.45rem 0.7rem">${m.desc||'(sin descripción)'}</td>
+          <td style="color:var(--muted);padding:0.45rem 0.7rem">${m.date||'—'}</td>
+          <td style="padding:0.45rem 0.7rem"><button class="btn btn-danger btn-sm" onclick="deleteMatch('${m.id}')">✕</button></td>
+        </tr>`).join('')}
+      </tbody></table>
+    </div>`);
+  }
+  return grupos.join('');
+}
+
+function setActiveFecha() {
+  const val = document.getElementById('fecha-activa-sel').value;
+  state.activeFecha = val || null;
+  save();
+  renderAdmin('partidos');
+}
+
+function setActiveFechaNull() {
+  state.activeFecha = null;
+  save();
+  renderAdmin('partidos');
+}
+
+function migrateMatch(matchId) {
+  const localId  = document.getElementById(`mig-local-${matchId}`).value;
+  const visitaId = document.getElementById(`mig-visita-${matchId}`).value;
+  const alertEl  = document.getElementById(`mig-alert-${matchId}`);
+  if (!localId || !visitaId) {
+    alertEl.innerHTML = `<div class="alert alert-error" style="margin-top:0.4rem">Elegí local y visitante</div>`; return;
+  }
+  if (localId === visitaId) {
+    alertEl.innerHTML = `<div class="alert alert-error" style="margin-top:0.4rem">No pueden ser el mismo equipo</div>`; return;
+  }
+  const m = state.matches.find(x => x.id === matchId);
+  if (m) { m.localId = localId; m.visitaId = visitaId; }
+  save();
+  renderAdmin('partidos');
+}
+
+function addMatch() {
+  const fecha = document.getElementById('mfecha').value;
+  const localId = document.getElementById('mlocal').value;
+  const visitaId = document.getElementById('mvisita').value;
+  const date = document.getElementById('mdate').value;
+  if (!fecha || !localId || !visitaId) {
+    document.getElementById('match-alert').innerHTML = `<div class="alert alert-error" style="margin-top:0.5rem">Completá fecha, local y visitante</div>`;
+    return;
+  }
+  if (localId === visitaId) {
+    document.getElementById('match-alert').innerHTML = `<div class="alert alert-error" style="margin-top:0.5rem">El local y visitante no pueden ser el mismo</div>`;
+    return;
+  }
+  const local = state.teams.find(t=>t.id===localId)?.name || '';
+  const visita = state.teams.find(t=>t.id===visitaId)?.name || '';
+  const desc = `Fecha ${fecha} · ${local} vs ${visita}`;
+  state.matches.push({ id: Date.now().toString(), desc, date, fechaNum: fecha, localId, visitaId });
+  save();
+  document.getElementById('match-alert').innerHTML = `<div class="alert alert-success" style="margin-top:0.5rem">✓ ${desc} agregado</div>`;
+  setTimeout(() => renderAdmin('partidos'), 800);
+}
+
+function deleteMatch(id) {
+  const m = state.matches.find(x => x.id === id);
+  const html = `<div class="modal-overlay"><div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">⚠️ Eliminar partido</div>
+    <p style="margin-bottom:1rem;color:var(--muted);font-size:0.9rem">¿Eliminar <strong style="color:var(--text)">${m?.desc}</strong>?</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-danger" onclick="confirmDeleteMatch('${id}')">Eliminar</button>
+    </div>
+  </div></div>`;
+  document.getElementById('modal-container').innerHTML = html;
+}
+function confirmDeleteMatch(id) {
+  state.matches = state.matches.filter(m => m.id !== id);
+  // Borrar todos los puntajes de ese partido
+  for (const playerId in state.scores) {
+    if (state.scores[playerId][id]) {
+      delete state.scores[playerId][id];
+    }
+  }
+  save(); closeModal(); renderAdmin('partidos');
+}
+
+// ==================== BUDGET HELPERS ====================
+function getDtSpent(dtId) {
+  const roster = state.dtTeams[dtId] || [];
+  return roster.reduce((sum, pid) => {
+    const p = state.players.find(pl => pl.id === pid);
+    return sum + (p ? (p.valor || 0) : 0);
+  }, 0);
+}
+function getDtBudgetLeft(dtId) { return BUDGET - getDtSpent(dtId); }
+
+function buildDtBudgetRows() {
+  return state.dts.map(d => {
+    const roster = state.dtTeams[d.id] || [];
+    const spent = getDtSpent(d.id);
+    const left = getDtBudgetLeft(d.id);
+    return `<tr style="${left<0?'background:#FF174411':''}">
+      <td><strong>${d.name}</strong> ${left<0?'<span style="color:var(--red);font-size:0.7rem">⚠️ Excedido</span>':''}</td>
+      <td>${roster.length}/11</td>
+      <td style="color:var(--red)">$${spent}M</td>
+      <td style="color:${left<0?'var(--red)':left<10?'var(--gold)':'var(--green)'};font-weight:700">$${left}M</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderAdminMercado() {
+  const tc = document.getElementById('tab-content');
+  const borderColor = state.mercadoAbierto ? 'var(--green-dim)' : '#FF174433';
+  const statusColor = state.mercadoAbierto ? 'var(--green)' : 'var(--red)';
+  const statusLabel = state.mercadoAbierto ? '🟢 Mercado abierto' : '🔴 Mercado cerrado';
+  const btnClass = state.mercadoAbierto ? 'btn-danger' : 'btn-primary';
+  const btnLabel = state.mercadoAbierto ? 'Cerrar mercado' : 'Abrir mercado';
+  const dtRows = state.dts.length === 0
+    ? '<div class="empty-state"><div class="empty-icon">🏆</div><p>Sin DTs</p></div>'
+    : `<table class="data-table"><thead><tr><th>DT</th><th>Jugadores</th><th>Gastado</th><th>Saldo</th></tr></thead><tbody>${buildDtBudgetRows()}</tbody></table>`;
+  tc.innerHTML = `
+    <div class="card" style="border-color:${borderColor}">
+      <div class="card-title">📍 Estado del mercado</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem">
+        <div style="font-size:1.1rem;font-weight:700;color:${statusColor}">${statusLabel}</div>
+        <button class="btn ${btnClass}" onclick="toggleMercadoAdmin()">${btnLabel}</button>
+      </div>
+      <p style="font-size:0.8rem;color:var(--muted);margin-top:0.6rem">Cuando está cerrado, los DTs no pueden fichar ni vender jugadores.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">💰 Presupuesto por DT</div>
+      <div style="font-size:1.5rem;font-weight:700;color:var(--gold);font-family:'Barlow Condensed',sans-serif">$${BUDGET}M por DT</div>
+    </div>
+    <div class="card">
+      <div class="card-title">📊 Resumen por DT</div>
+      ${dtRows}
+    </div>
+`;
+}
+
+function toggleMercadoAdmin() {
+  state.mercadoAbierto = !state.mercadoAbierto;
+  save(); renderAdminMercado();
+}
+
+function renderAdminDts() {
+  const tc = document.getElementById('tab-content');
+  tc.innerHTML = `
+    <div class="alert alert-info" style="margin-bottom:1rem">Los DTs se registran solos desde la pantalla de inicio. Acá podés ver quiénes están registrados y eliminarlos si es necesario.</div>
+    <div class="card">
+      <div class="card-title">🏆 DTs registrados (${state.dts.length})</div>
+      ${state.dts.length === 0 ? `<div class="empty-state"><div class="empty-icon">🏆</div><p>Aún no hay DTs registrados</p></div>` : `
+      <table class="data-table">
+        <thead><tr><th>DT</th><th>Esquema</th><th>Jugadores</th><th>Puntos</th><th></th></tr></thead>
+        <tbody>
+          ${state.dts.map(d => {
+            const roster = state.dtTeams[d.id] || [];
+            // Check if any team has more than 4 players
+            const tCounts = {};
+            roster.forEach(pid => {
+              const p = state.players.find(pl => pl.id === pid);
+              const key = (p && p.teamId) ? p.teamId : '__sinequipo__';
+              tCounts[key] = (tCounts[key] || 0) + 1;
+            });
+            const hasOverLimit = Object.values(tCounts).some(cnt => cnt > 4);
+            return `<tr>
+              <td><strong>${d.name}</strong> ${hasOverLimit ? '<span title="Tiene más de 4 jugadores del mismo equipo">⚠️</span>' : ''}</td>
+              <td style="color:var(--green);font-family:'Barlow Condensed',sans-serif">${d.formation || '—'}</td>
+              <td>${roster.length}/11</td>
+              <td style="color:var(--gold);font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;">${calcDtPts(d.id)}</td>
+              <td><button class="btn btn-danger btn-sm" onclick="deleteDt('${d.id}')">✕</button></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>`}
+    </div>`;
+}
+
+function deleteDt(id) {
+  const d = state.dts.find(x => x.id === id);
+  const html = `<div class="modal-overlay"><div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">⚠️ Eliminar DT</div>
+    <p style="margin-bottom:1rem;color:var(--muted);font-size:0.9rem">¿Eliminar a <strong style="color:var(--text)">${d?.name}</strong>?</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-danger" onclick="confirmDeleteDt('${id}')">Eliminar</button>
+    </div>
+  </div></div>`;
+  document.getElementById('modal-container').innerHTML = html;
+}
+function confirmDeleteDt(id) {
+  state.dts = state.dts.filter(d => d.id !== id);
+  delete state.dtTeams[id];
+  save(); closeModal(); renderAdmin('dts');
+}
+
+// ==================== VEEDOR ====================
+let veedorState = { matchId: null, playerId: null, filter: 'todos' };
+
+function renderVeedor(tab) {
+  const t = tab || 'puntuar';
+  currentTab = t;
+  const c = document.getElementById('main-content');
+  c.innerHTML = `
+    <div class="tabs">
+      <button class="tab ${t==='puntuar'?'active':''}" onclick="renderVeedor('puntuar')">⚽ Puntuar</button>
+      <button class="tab ${t==='historial'?'active':''}" onclick="renderVeedor('historial')">📊 Historial</button>
+    </div>
+    <div id="tab-content"></div>`;
+  if (t === 'puntuar') renderVeedorPuntuar();
+  if (t === 'historial') renderVeedorHistorial();
+}
+
+function renderVeedorPuntuar() {
+  const tc = document.getElementById('tab-content');
+  if (state.matches.length === 0) {
+    tc.innerHTML = `<div class="alert alert-info">No hay partidos cargados. Un administrador debe agregarlos primero.</div>`; return;
+  }
+  if (state.players.length === 0) {
+    tc.innerHTML = `<div class="alert alert-info">No hay jugadores registrados.</div>`; return;
+  }
+
+  const selMatch = veedorState.matchId || state.matches[0].id;
+  veedorState.matchId = selMatch;
+  const match = state.matches.find(m => m.id === selMatch);
+
+  // Jugadores del partido: solo los dos equipos que juegan
+  const matchTeamIds = [match?.localId, match?.visitaId].filter(Boolean);
+  let basePlayers = matchTeamIds.length > 0
+    ? state.players.filter(p => matchTeamIds.includes(p.teamId))
+    : state.players; // fallback partidos viejos sin equipos guardados
+
+  if (veedorState.filter !== 'todos') {
+    basePlayers = basePlayers.filter(p => p.pos.toLowerCase() === veedorState.filter);
+  }
+
+  // Agrupar por equipo
+  const localTeam   = match?.localId   ? state.teams.find(t => t.id === match.localId)   : null;
+  const visitaTeam  = match?.visitaId  ? state.teams.find(t => t.id === match.visitaId)  : null;
+
+  function playerRow(p) {
+    const team = state.teams.find(t => t.id === p.teamId);
+    const pts = calcPlayerPtsInMatch(p.id, selMatch);
+    return `<div class="player-item" onclick="openScoringModal('${p.id}','${selMatch}')">
+      <div class="player-info">
+        <div class="player-name">${posEmoji(p.pos)} ${p.name}</div>
+        <div class="player-meta"><span class="badge ${getBadgeClass(p.pos)}">${p.pos}</span></div>
+      </div>
+      <div class="player-pts" style="color:${pts>0?'#00C853':pts<0?'#FF1744':'var(--gold)'}">${pts>0?'+':''}${pts} pts</div>
+    </div>`;
+  }
+
+  function teamBlock(team, players) {
+    if (!team || players.length === 0) return '';
+    return `<div style="margin-bottom:0.5rem">
+      <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#6A8F6A;padding:0.5rem 0 0.3rem">${team.name}</div>
+      ${players.map(playerRow).join('')}
+    </div>`;
+  }
+
+  const localPlayers  = basePlayers.filter(p => p.teamId === match?.localId);
+  const visitaPlayers = basePlayers.filter(p => p.teamId === match?.visitaId);
+  const otherPlayers  = basePlayers.filter(p => !matchTeamIds.includes(p.teamId));
+
+  tc.innerHTML = `
+    <div class="card">
+      <div class="card-title">📅 Partido a puntuar</div>
+      <div class="form-group">
+        <select onchange="veedorState.matchId=this.value;veedorState.filter='todos';renderVeedorPuntuar()">
+          ${state.matches.map(m=>`<option value="${m.id}" ${m.id===selMatch?'selected':''}>${m.desc}${m.date?' · '+m.date:''}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">👥 Jugadores del partido</div>
+      <div class="filter-bar">
+        ${['todos','arquero','defensor','mediocampista','delantero'].map(f=>`
+          <div class="filter-chip ${veedorState.filter===f?'active':''}" onclick="veedorState.filter='${f}';renderVeedorPuntuar()">${f==='todos'?'Todos':f.charAt(0).toUpperCase()+f.slice(1)}</div>
+        `).join('')}
+      </div>
+      <div class="player-list">
+        ${matchTeamIds.length > 0
+          ? teamBlock(localTeam, localPlayers) + teamBlock(visitaTeam, visitaPlayers) + (otherPlayers.length>0 ? teamBlock({name:'Otros'},otherPlayers) : '')
+          : basePlayers.map(playerRow).join('')
+        }
+        ${basePlayers.length === 0 ? `<div class="empty-state"><div class="empty-icon">👥</div><p>No hay jugadores con esa posición en este partido</p></div>` : ''}
+      </div>
+    </div>`;
+}
+
+function calcPlayerPtsInMatch(playerId, matchId) {
+  return calcPlayerMatchPts(playerId, matchId);
+}
+
+function openScoringModal(playerId, matchId) {
+  const player = state.players.find(p => p.id === playerId);
+  const match = state.matches.find(m => m.id === matchId);
+  const currentActions = ((state.scores[playerId] || {})[matchId]) || {};
+
+  const clarinVal = currentActions.clarin || 0;
+  const html = `
+    <div class="modal-overlay" onclick="closeModal();renderVeedorPuntuar()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-title">⚽ ${player.name}</div>
+        <div style="font-size:0.82rem;color:var(--muted);margin-bottom:1rem">${match.desc} · <span class="badge ${getBadgeClass(player.pos)}">${player.pos}</span></div>
+
+        <!-- Calificación Clarín -->
+        <div style="background:var(--card-bg);border:1px solid var(--green-dim);border-radius:10px;padding:0.75rem 1rem;margin-bottom:1rem">
+          <div style="font-size:0.72rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.5rem">📰 Calificación Clarín (1–10)</div>
+          <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap">
+            ${[1,2,3,4,5,6,7,8,9,10].map(n => `
+              <button onclick="setClarinScore('${playerId}','${matchId}',${n})"
+                style="width:2.2rem;height:2.2rem;border-radius:50%;border:2px solid ${clarinVal===n?'var(--green)':'var(--green-dim)'};background:${clarinVal===n?'var(--green)':'transparent'};color:${clarinVal===n?'#000':'var(--text)'};font-weight:700;font-family:'Barlow Condensed',sans-serif;font-size:1rem;cursor:pointer"
+                id="clarin-btn-${n}">${n}</button>
+            `).join('')}
+            <button onclick="setClarinScore('${playerId}','${matchId}',0)"
+              style="padding:0.2rem 0.6rem;border-radius:6px;border:1px solid var(--muted);background:transparent;color:var(--muted);font-size:0.75rem;cursor:pointer">
+              Limpiar
+            </button>
+          </div>
+          <div style="font-size:0.78rem;color:var(--gold);margin-top:0.4rem">
+            ${clarinVal ? 'Calificación: ' + clarinVal + ' pts base' : 'Sin calificación cargada'}
+          </div>
+        </div>
+
+        <!-- Acciones -->
+        <div style="font-size:0.72rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.5rem">Acciones del partido</div>
+        <div class="scoring-grid" id="scoring-grid">
+          ${ACTIONS.map(a => {
+            const count = currentActions[a.id] || 0;
+            return `<div class="score-action" id="sa-${a.id}">
+              <div class="action-icon">${a.icon}</div>
+              <div class="action-label">${a.label}</div>
+              <div class="action-pts ${a.pos?'action-pos':'action-neg'}">${a.pts>0?'+':''}${a.pts} pts</div>
+              <div style="display:flex;align-items:center;gap:0.4rem;margin-top:0.3rem">
+                <button class="btn btn-secondary btn-sm" style="padding:0.2rem 0.5rem" onclick="changeAction('${playerId}','${matchId}','${a.id}',-1)">−</button>
+                <span id="cnt-${a.id}" style="font-family:'Barlow Condensed',sans-serif;font-size:1.2rem;min-width:1.2rem;text-align:center">${count}</span>
+                <button class="btn btn-secondary btn-sm" style="padding:0.2rem 0.5rem" onclick="changeAction('${playerId}','${matchId}','${a.id}',1)">+</button>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+        <hr class="divider">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;">
+            Total: <span id="modal-total" style="color:var(--gold)">${calcPlayerMatchPts(playerId,matchId)}</span> pts
+          </div>
+          <button class="btn btn-primary" onclick="closeModal();renderVeedorPuntuar()">Guardar ✓</button>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('modal-container').innerHTML = html;
+}
+
+function changeAction(playerId, matchId, actionId, delta) {
+  if (!state.scores[playerId]) state.scores[playerId] = {};
+  if (!state.scores[playerId][matchId]) state.scores[playerId][matchId] = {};
+  const cur = state.scores[playerId][matchId][actionId] || 0;
+  const newVal = Math.max(0, cur + delta);
+  state.scores[playerId][matchId][actionId] = newVal;
+  save();
+  document.getElementById(`cnt-${actionId}`).textContent = newVal;
+  document.getElementById('modal-total').textContent = calcPlayerMatchPts(playerId, matchId);
+}
+
+function setClarinScore(playerId, matchId, val) {
+  if (!state.scores[playerId]) state.scores[playerId] = {};
+  if (!state.scores[playerId][matchId]) state.scores[playerId][matchId] = {};
+  state.scores[playerId][matchId].clarin = val;
+  save();
+  // Update button styles
+  for (let n = 1; n <= 10; n++) {
+    const btn = document.getElementById('clarin-btn-' + n);
+    if (!btn) continue;
+    const active = n === val;
+    btn.style.borderColor = active ? 'var(--green)' : 'var(--green-dim)';
+    btn.style.background = active ? 'var(--green)' : 'transparent';
+    btn.style.color = active ? '#000' : 'var(--text)';
+  }
+  document.getElementById('modal-total').textContent = calcPlayerMatchPts(playerId, matchId);
+}
+
+function renderVeedorHistorial() {
+  const tc = document.getElementById('tab-content');
+  const players = [...state.players].sort((a,b) => calcPlayerTotalPts(b.id) - calcPlayerTotalPts(a.id));
+  tc.innerHTML = `
+    <div class="card">
+      <div class="card-title">📊 Ranking de Jugadores</div>
+      ${players.length === 0 ? `<div class="empty-state"><div class="empty-icon">📊</div><p>No hay datos aún</p></div>` : `
+      <table class="data-table">
+        <thead><tr><th>#</th><th>Jugador</th><th>Equipo</th><th>Pos</th><th>Total</th></tr></thead>
+        <tbody>
+          ${players.map((p,i) => {
+            const team = state.teams.find(t=>t.id===p.teamId);
+            return `<tr>
+              <td style="color:var(--muted);font-family:'Barlow Condensed',sans-serif">${i+1}</td>
+              <td>${p.name}</td>
+              <td>${team?team.name:'-'}</td>
+              <td><span class="badge ${getBadgeClass(p.pos)}">${p.pos}</span></td>
+              <td style="color:var(--gold);font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:700">${calcPlayerTotalPts(p.id)}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>`}
+    </div>`;
+}
+
+// ==================== DT ====================
+let dtTab = 'equipo';
+let dtFilter = 'todos';
+let dtTeamFilter = 'todos';
+let dtViewFecha = null; // null = fecha activa
+
+// All supported formations: name → rows (top=attack, bottom=GK)
+const FORMATIONS = {
+  '4-4-2': [
+    { pos:'Delantero',     count:2, label:'DEL' },
+    { pos:'Mediocampista', count:4, label:'MED' },
+    { pos:'Defensor',      count:4, label:'DEF' },
+    { pos:'Arquero',       count:1, label:'ARQ' },
+  ],
+  '4-3-3': [
+    { pos:'Delantero',     count:3, label:'DEL' },
+    { pos:'Mediocampista', count:3, label:'MED' },
+    { pos:'Defensor',      count:4, label:'DEF' },
+    { pos:'Arquero',       count:1, label:'ARQ' },
+  ],
+  '3-4-3': [
+    { pos:'Delantero',     count:3, label:'DEL' },
+    { pos:'Mediocampista', count:4, label:'MED' },
+    { pos:'Defensor',      count:3, label:'DEF' },
+    { pos:'Arquero',       count:1, label:'ARQ' },
+  ],
+  '4-5-1': [
+    { pos:'Delantero',     count:1, label:'DEL' },
+    { pos:'Mediocampista', count:5, label:'MED' },
+    { pos:'Defensor',      count:4, label:'DEF' },
+    { pos:'Arquero',       count:1, label:'ARQ' },
+  ],
+  '3-5-2': [
+    { pos:'Delantero',     count:2, label:'DEL' },
+    { pos:'Mediocampista', count:5, label:'MED' },
+    { pos:'Defensor',      count:3, label:'DEF' },
+    { pos:'Arquero',       count:1, label:'ARQ' },
+  ],
+  '5-3-2': [
+    { pos:'Delantero',     count:2, label:'DEL' },
+    { pos:'Mediocampista', count:3, label:'MED' },
+    { pos:'Defensor',      count:5, label:'DEF' },
+    { pos:'Arquero',       count:1, label:'ARQ' },
+  ],
+  '3-3-4': [
+    { pos:'Delantero',     count:4, label:'DEL' },
+    { pos:'Mediocampista', count:3, label:'MED' },
+    { pos:'Defensor',      count:3, label:'DEF' },
+    { pos:'Arquero',       count:1, label:'ARQ' },
+  ],
+  '4-2-4': [
+    { pos:'Delantero',     count:4, label:'DEL' },
+    { pos:'Mediocampista', count:2, label:'MED' },
+    { pos:'Defensor',      count:4, label:'DEF' },
+    { pos:'Arquero',       count:1, label:'ARQ' },
+  ],
+  '5-2-3': [
+    { pos:'Delantero',     count:3, label:'DEL' },
+    { pos:'Mediocampista', count:2, label:'MED' },
+    { pos:'Defensor',      count:5, label:'DEF' },
+    { pos:'Arquero',       count:1, label:'ARQ' },
+  ],
+};
+
+function getDtFormation() {
+  const dt = state.dts.find(d => d.id === currentDtId);
+  return (dt && dt.formation && FORMATIONS[dt.formation]) ? dt.formation : '4-3-3';
+}
+
+function setDtFormation(f) {
+  const dt = state.dts.find(d => d.id === currentDtId);
+  if (!dt) return;
+  // If already this formation, do nothing
+  if (dt.formation === f) return;
+  // If team has players, ask confirmation
+  if ((state.dtTeams[currentDtId]||[]).length > 0) {
+    const html = `
+      <div class="modal-overlay">
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-title">🗂 Cambiar esquema</div>
+          <p style="margin-bottom:1rem;color:var(--muted);font-size:0.9rem">Cambiar a <strong style="color:var(--text)">${f}</strong> va a limpiar tu equipo actual. ¿Confirmás?</p>
+          <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+            <button class="btn btn-primary" onclick="applyFormation('${f}')">Sí, cambiar</button>
+          </div>
+        </div>
+      </div>`;
+    document.getElementById('modal-container').innerHTML = html;
+  } else {
+    applyFormation(f);
+  }
+}
+
+function applyFormation(f) {
+  const dt = state.dts.find(d => d.id === currentDtId);
+  if (!dt) return;
+  dt.formation = f;
+  state.dtTeams[currentDtId] = [];
+  save();
+  closeModal();
+  renderDtEquipo();
+}
+
+function renderDt(tab) {
+  dtTab = tab || dtTab;
+  const c = document.getElementById('main-content');
+  c.innerHTML = `
+    <div class="tabs">
+      <button class="tab ${dtTab==='equipo'?'active':''}" onclick="renderDt('equipo')">⚽ Mi Equipo</button>
+      <button class="tab ${dtTab==='mercado'?'active':''}" onclick="renderDt('mercado')">🔍 Mercado</button>
+      <button class="tab ${dtTab==='ranking'?'active':''}" onclick="renderDt('ranking')">🏆 Ranking</button>
+    </div>
+    <div id="tab-content"></div>`;
+  if (dtTab === 'equipo') renderDtEquipo();
+  if (dtTab === 'mercado') renderDtMercado();
+  if (dtTab === 'ranking') renderDtRanking();
+}
+
+function getDtRoster() {
+  return state.dtTeams[currentDtId] || [];
+}
+
+function enforceTeamLimit(dtId) {
+  // Auto-remove excess players (more than 4 from same team)
+  const roster = state.dtTeams[dtId] || [];
+  const teamCounts = {};
+  const toRemove = [];
+  // Iterate in reverse so we remove the last-added ones
+  for (let i = roster.length - 1; i >= 0; i--) {
+    const pid = roster[i];
+    const p = state.players.find(pl => pl.id === pid);
+    const key = (p && p.teamId) ? p.teamId : '__sinequipo__';
+    teamCounts[key] = (teamCounts[key] || 0) + 1;
+    if (teamCounts[key] > 4) toRemove.push(pid);
+  }
+  if (toRemove.length > 0) {
+    state.dtTeams[dtId] = roster.filter(pid => !toRemove.includes(pid));
+    save();
+    return true; // changed
+  }
+  return false;
+}
+
+function renderDtEquipo() {
+  enforceTeamLimit(currentDtId);
+  const tc = document.getElementById('tab-content');
+  const roster = getDtRoster();
+  const totalPts = calcDtPts(currentDtId);
+  const dt = state.dts.find(d => d.id === currentDtId);
+  const formation = getDtFormation();
+  const formationRows = FORMATIONS[formation];
+  const captainId = state.dtCaptains[currentDtId] || null;
+
+  // Fecha a visualizar: dtViewFecha o la activa por default
+  const viewFecha = dtViewFecha || state.activeFecha || null;
+
+  // Fechas disponibles (con al menos un partido)
+  const fechasDisponibles = [...new Set(state.matches.map(m => m.fechaNum).filter(Boolean))].sort((a,b)=>Number(a)-Number(b));
+
+  // Pts de un jugador en la fecha visualizada
+  function playerViewPts(pid) {
+    if (!viewFecha) return 0;
+    const matchesF = state.matches.filter(m => m.fechaNum === viewFecha);
+    return matchesF.reduce((sum, m) => sum + calcPlayerMatchPts(pid, m.id), 0);
+  }
+
+  // Pts totales del DT en la fecha visualizada
+  const dtViewFechaPts = roster.reduce((sum, pid) => {
+    const pts = playerViewPts(pid);
+    return sum + (pid === captainId ? pts * 2 : pts);
+  }, 0);
+
+  // Build slots
+  let slots = [];
+  formationRows.forEach(row => {
+    for (let i = 0; i < row.count; i++) slots.push({ pos: row.pos, playerId: null });
+  });
+  let rosterByPos = {};
+  roster.forEach(pid => {
+    const p = state.players.find(pl => pl.id === pid);
+    if (!p) return;
+    if (!rosterByPos[p.pos]) rosterByPos[p.pos] = [];
+    rosterByPos[p.pos].push(pid);
+  });
+  slots.forEach(slot => {
+    const pool = rosterByPos[slot.pos] || [];
+    if (pool.length > 0) slot.playerId = pool.shift();
+  });
+
+  let pitchHtml = '';
+  formationRows.forEach(row => {
+    const rowSlots = slots.filter(s => s.pos === row.pos);
+    pitchHtml += `<div class="pitch-row">`;
+    rowSlots.forEach(slot => {
+      const globalIdx = slots.indexOf(slot);
+      const p = slot.playerId ? state.players.find(pl => pl.id === slot.playerId) : null;
+      const isCaptain = p && p.id === captainId;
+      const fPts = p ? playerViewPts(p.id) : 0;
+      const tPts = p ? calcPlayerTotalPts(p.id) : 0;
+      pitchHtml += `<div class="pitch-slot ${p?'filled':''}" onclick="openSlotModal(${globalIdx}, '${slot.pos}')">
+        <div class="slot-circle" style="${isCaptain?'border-color:#FFD600;background:#FFD60022;':''}">${isCaptain?'🅲':p ? posEmoji(p.pos) : '<span style="color:var(--border);font-size:0.9rem">+</span>'}</div>
+        <div class="slot-name" style="${isCaptain?'color:#FFD600;font-weight:700;':''}">${p ? p.name.split(' ')[0] : row.label}</div>
+        ${p ? `
+          <div class="slot-pts" style="color:${fPts>0?'#00C853':fPts<0?'#FF1744':'#6A8F6A'}">${viewFecha?(fPts>0?'+':'')+fPts+(isCaptain?' ×2':''):'—'}</div>
+          <div style="font-size:0.55rem;color:var(--muted)">${isCaptain?tPts*2:tPts} total</div>
+        ` : `<div class="slot-team" style="font-size:0.58rem;color:var(--border)">vacío</div>`}
+      </div>`;
+    });
+    pitchHtml += `</div>`;
+  });
+
+  const formChips = Object.keys(FORMATIONS).map(f => `
+    <div class="filter-chip ${f===formation?'active':''}" data-formation="${f}" onclick="setDtFormation(this.dataset.formation)">${f}</div>
+  `).join('');
+
+  const captainPlayer = captainId ? state.players.find(p => p.id === captainId) : null;
+
+  // Selector de fecha
+  const fechaSelector = fechasDisponibles.length === 0 ? '' : `
+    <div class="card" style="padding:0.75rem 1.1rem;margin-bottom:1rem">
+      <div style="font-size:0.72rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.5rem">📅 Ver puntos por fecha</div>
+      <div class="filter-bar" style="margin-bottom:0">
+        ${state.activeFecha ? `<div class="filter-chip ${!dtViewFecha?'active':''}" onclick="dtViewFecha=null;renderDtEquipo()">Activa (F${state.activeFecha})</div>` : ''}
+        ${fechasDisponibles.map(f=>`
+          <div class="filter-chip ${dtViewFecha===f?'active':''}" onclick="dtViewFecha='${f}';renderDtEquipo()">Fecha ${f}</div>
+        `).join('')}
+        <div class="filter-chip ${!viewFecha?'active':''}" onclick="dtViewFecha=null;state.activeFecha=null;renderDtEquipo()" style="${!state.activeFecha&&!dtViewFecha?'':''}">Total</div>
+      </div>
+    </div>`;
+
+  const dtSpent = getDtSpent(currentDtId);
+  const dtLeft = getDtBudgetLeft(currentDtId);
+  const dtPct = Math.min(100, (dtSpent/BUDGET)*100);
+
+  // Check if any team has more than 4 players in roster
+  const teamCounts = {};
+  roster.forEach(pid => {
+    const rp = state.players.find(pl => pl.id === pid);
+    const key = (rp && rp.teamId) ? rp.teamId : '__sinequipo__';
+    teamCounts[key] = (teamCounts[key] || 0) + 1;
+  });
+  const overLimitTeams = Object.entries(teamCounts)
+    .filter(([tid, cnt]) => cnt > 4)
+    .map(([tid]) => {
+      if (tid === '__sinequipo__') return 'Sin equipo';
+      const t = state.teams.find(x => x.id === tid);
+      return t ? t.name : 'Equipo desconocido';
+    });
+  const overLimitWarning = '';
+
+  tc.innerHTML = `${overLimitWarning}
+    <div class="stat-row">
+      <div class="stat-chip">DT: <span>${dt ? dt.name : ''}</span></div>
+      <div class="stat-chip">Esquema: <span style="color:var(--green)">${formation}</span></div>
+      <div class="stat-chip">Jugadores: <span>${roster.length}/11</span></div>
+      ${viewFecha ? `<div class="stat-chip" style="border-color:#00C85355">Fecha ${viewFecha}: <span style="color:#00C853">${dtViewFechaPts}</span></div>` : ''}
+      <div class="stat-chip" style="border-color:#FFD60055">Torneo: <span style="color:#FFD600">${totalPts}</span></div>
+    </div>
+    <div class="card" style="padding:0.75rem 1.1rem;margin-bottom:0.75rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.35rem">
+        <div style="font-size:0.72rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase">💰 Presupuesto</div>
+        <div style="display:flex;gap:0.75rem;font-size:0.8rem">
+          <span style="color:var(--muted)">Gastado: <strong style="color:var(--red)">$${dtSpent}M</strong></span>
+          <span style="color:var(--muted)">Saldo: <strong style="color:${dtLeft<10?'var(--red)':dtLeft<25?'var(--gold)':'var(--green)'}">$${dtLeft}M</strong></span>
+        </div>
+      </div>
+      <div class="budget-bar">
+        <div class="budget-fill" style="width:${dtPct}%;background:${dtPct>85?'var(--red)':dtPct>60?'var(--gold)':'var(--green)'}"></div>
+      </div>
+    </div>
+    <div class="card" style="padding:0.9rem 1.1rem;margin-bottom:1rem">
+      <div style="font-size:0.72rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.6rem">🗂 Esquema</div>
+      <div class="filter-bar" style="margin-bottom:0">${formChips}</div>
+    </div>
+    <div class="card" style="padding:0.9rem 1.1rem;margin-bottom:1rem;border-color:${captainPlayer?'#FFD60044':'#2a3d2a'}">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:0.72rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.3rem">🅲 Capitán <span style="color:#FFD600">(x2 puntos)</span></div>
+          <div style="font-size:0.95rem;font-weight:700;color:${captainPlayer?'#FFD600':'#6A8F6A'}">${captainPlayer ? captainPlayer.name : 'Sin capitán elegido'}</div>
+        </div>
+        ${roster.length > 0 ? `<button class="btn btn-secondary btn-sm" onclick="openCaptainModal()" style="border-color:#FFD60066;color:#FFD600">${captainPlayer?'Cambiar':'Elegir capitán'}</button>` : ''}
+      </div>
+    </div>
+    ${fechaSelector}
+    ${roster.length < 11 ? `<div class="alert alert-info" style="margin-bottom:1rem">Tocá un lugar vacío en la cancha para fichar jugadores.</div>` : ''}
+    <div class="pitch-wrap">
+      <div class="pitch">${pitchHtml}</div>
+      ${roster.length > 0 ? `<button class="btn btn-danger btn-sm" onclick="clearTeam()">Limpiar equipo</button>` : ''}
+    </div>`;
+}
+
+function openSlotModal(slotIdx, pos, teamFilter) {
+  if (!state.mercadoAbierto) {
+    document.getElementById('modal-container').innerHTML = `
+      <div class="modal-overlay" onclick="closeModal()">
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-title">🔴 Mercado cerrado</div>
+          <p style="color:var(--muted);font-size:0.9rem;margin-bottom:1rem">No podés realizar cambios en tu equipo mientras el mercado está cerrado.</p>
+          <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Cerrar</button></div>
+        </div>
+      </div>`;
+    return;
+  }
+  teamFilter = teamFilter || 'todos';
+  const roster = getDtRoster();
+  const slots = buildSlots();
+  const slot = slots[slotIdx];
+  const existingPid = slot ? slot.playerId : null;
+
+  const allAvailable = state.players.filter(p => p.pos === pos && !roster.includes(p.id));
+  const available = allAvailable
+    .filter(p => teamFilter === 'todos' || p.teamId === teamFilter)
+    .sort((a,b) => calcPlayerTotalPts(b.id) - calcPlayerTotalPts(a.id));
+
+  const teamChips = `
+    <div class="filter-chip ${teamFilter==='todos'?'active':''}" onclick="openSlotModal(${slotIdx},'${pos}','todos')">Todos</div>
+    ${state.teams.map(t => `
+      <div class="filter-chip ${teamFilter===t.id?'active':''}" onclick="openSlotModal(${slotIdx},'${pos}','${t.id}')">${t.name}</div>
+    `).join('')}
+  `;
+
+  const html = `
+    <div class="modal-overlay" onclick="closeModal()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-title">${posEmoji(pos)} Elegir ${pos}</div>
+        ${existingPid ? `
+          <div class="alert alert-info" style="margin-bottom:0.75rem;display:flex;justify-content:space-between;align-items:center">
+            <span>Actual: <strong>${state.players.find(p=>p.id===existingPid)?.name}</strong></span>
+            <button class="btn btn-danger btn-sm" onclick="removeFromTeam('${existingPid}')">Quitar</button>
+          </div>` : ''}
+        <div style="font-size:0.72rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.4rem">Filtrar por equipo</div>
+        <div class="filter-bar" style="margin-bottom:0.9rem">${teamChips}</div>
+        ${available.length === 0 ? `<div class="alert alert-info">No hay ${pos.toLowerCase()}s disponibles${teamFilter!=='todos'?' de ese equipo':''}.</div>` : `
+        <div class="player-list">
+          ${available.map(p => {
+            const team = state.teams.find(t=>t.id===p.teamId);
+            const left = getDtBudgetLeft(currentDtId);
+            const canAfford = (p.valor||0) <= left;
+            return `<div class="player-item" onclick="${canAfford || !state.mercadoAbierto ? `addToTeam('${p.id}')` : `alert('No tenés saldo suficiente para fichar a ${p.name}')`}" style="${!canAfford && state.mercadoAbierto?'opacity:0.5':''}">
+              <div class="player-info">
+                <div class="player-name">${p.name} ${!canAfford && state.mercadoAbierto ? '<span style="color:var(--red);font-size:0.7rem">Sin saldo</span>' : ''}</div>
+                <div class="player-meta">${team?team.name:'Sin equipo'}</div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;color:var(--gold)">${p.valor ? '$'+p.valor+'M' : '—'}</div>
+                <div class="player-pts" style="font-size:0.72rem">${calcPlayerTotalPts(p.id)} pts</div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>`}
+        <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Cerrar</button></div>
+      </div>
+    </div>`;
+  document.getElementById('modal-container').innerHTML = html;
+}
+
+function buildSlots() {
+  const roster = getDtRoster();
+  const formation = getDtFormation();
+  const formationRows = FORMATIONS[formation];
+  let slots = [];
+  formationRows.forEach(row => {
+    for (let i = 0; i < row.count; i++) slots.push({ pos: row.pos, playerId: null });
+  });
+  let rosterByPos = {};
+  roster.forEach(pid => {
+    const p = state.players.find(pl => pl.id === pid);
+    if (!p) return;
+    if (!rosterByPos[p.pos]) rosterByPos[p.pos] = [];
+    rosterByPos[p.pos].push(pid);
+  });
+  slots.forEach(slot => {
+    const pool = rosterByPos[slot.pos] || [];
+    if (pool.length > 0) slot.playerId = pool.shift();
+  });
+  return slots;
+}
+
+function addToTeam(playerId) {
+  if (!state.dtTeams[currentDtId]) state.dtTeams[currentDtId] = [];
+  const roster = state.dtTeams[currentDtId];
+  if (roster.includes(playerId)) return;
+  if (roster.length >= 11) { alert('Ya tenés 11 jugadores'); return; }
+  const p = state.players.find(pl => pl.id === playerId);
+  // Verificar límite de 4 jugadores por equipo
+  if (p && p.teamId) {
+    const sameTeamCount = roster.filter(pid => {
+      const rp = state.players.find(pl => pl.id === pid);
+      return rp && rp.teamId === p.teamId;
+    }).length;
+    if (sameTeamCount >= 4) {
+      const team = state.teams.find(t => t.id === p.teamId);
+      alert('No podés agregar a ' + p.name + '. Ya tenés 4 jugadores de ' + (team ? team.name : 'ese equipo') + ' (máximo permitido).');
+      return;
+    }
+  }
+  if (p && (p.valor||0) > getDtBudgetLeft(currentDtId)) {
+    alert('No tenés saldo suficiente para fichar a ' + p.name + '. Necesitás $' + (p.valor||0) + 'M pero solo tenés $' + getDtBudgetLeft(currentDtId) + 'M.'); return;
+  }
+  if (state.mercadoAbierto && p) {
+    state.transfers = state.transfers || [];
+    state.transfers.push({
+      dtId: currentDtId, playerId, playerName: p.name,
+      type: 'fichar', valor: p.valor||0,
+      fecha: new Date().toLocaleDateString('es-AR')
+    });
+  }
+  roster.push(playerId);
+  save();
+  closeModal();
+  renderDt('equipo');
+}
+
+function removeFromTeam(playerId) {
+  if (!state.dtTeams[currentDtId]) return;
+  const p = state.players.find(pl => pl.id === playerId);
+  if (state.mercadoAbierto && p) {
+    state.transfers = state.transfers || [];
+    state.transfers.push({
+      dtId: currentDtId, playerId, playerName: p.name,
+      type: 'vender', valor: p.valor||0,
+      fecha: new Date().toLocaleDateString('es-AR')
+    });
+  }
+  state.dtTeams[currentDtId] = state.dtTeams[currentDtId].filter(id => id !== playerId);
+  save();
+  closeModal();
+  renderDt('equipo');
+}
+
+function clearTeam() {
+  const html = `<div class="modal-overlay"><div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">⚠️ Limpiar equipo</div>
+    <p style="margin-bottom:1rem;color:var(--muted);font-size:0.9rem">¿Limpiar todos los jugadores de tu equipo?</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-danger" onclick="confirmClearTeam()">Limpiar</button>
+    </div>
+  </div></div>`;
+  document.getElementById('modal-container').innerHTML = html;
+}
+function confirmClearTeam() {
+  state.dtTeams[currentDtId] = [];
+  state.dtCaptains[currentDtId] = null;
+  save(); closeModal(); renderDt('equipo');
+}
+
+function openCaptainModal() {
+  const roster = getDtRoster();
+  const captainId = state.dtCaptains[currentDtId] || null;
+  const html = `
+    <div class="modal-overlay" onclick="closeModal()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-title">🅲 Elegir Capitán</div>
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:1rem">El capitán suma el <strong style="color:#FFD600">doble de puntos</strong>. Elegí bien.</p>
+        <div class="player-list">
+          ${roster.map(pid => {
+            const p = state.players.find(pl => pl.id === pid);
+            if (!p) return '';
+            const team = state.teams.find(t => t.id === p.teamId);
+            const isCaptain = pid === captainId;
+            return `<div class="player-item ${isCaptain?'selected':''}" onclick="setCaptain('${pid}')" style="${isCaptain?'border-left:3px solid #FFD600;':''}">
+              <div class="player-info">
+                <div class="player-name">${isCaptain?'🅲 ':''}${p.name} ${isCaptain?'<span style="color:#FFD600;font-size:0.75rem">Capitán actual</span>':''}</div>
+                <div class="player-meta">${team?team.name:'Sin equipo'} · <span class="badge ${getBadgeClass(p.pos)}">${p.pos}</span></div>
+              </div>
+              <div style="text-align:right">
+                ${state.activeFecha?`<div style="font-size:0.75rem;color:#00C853">${calcPlayerActivePts(pid)>0?'+':''}${calcPlayerActivePts(pid)} esta fecha</div>`:''}
+                <div class="player-pts">${calcPlayerTotalPts(pid)} total</div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+        ${captainId ? `<div style="margin-top:0.75rem;text-align:center"><button class="btn btn-secondary btn-sm" onclick="setCaptain(null)">Quitar capitán</button></div>` : ''}
+        <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Cerrar</button></div>
+      </div>
+    </div>`;
+  document.getElementById('modal-container').innerHTML = html;
+}
+
+function setCaptain(playerId) {
+  state.dtCaptains[currentDtId] = playerId;
+  save();
+  closeModal();
+  renderDtEquipo();
+}
+
+function renderDtMercado() {
+  const tc = document.getElementById('tab-content');
+  const roster = getDtRoster();
+  const left = getDtBudgetLeft(currentDtId);
+  const spent = getDtSpent(currentDtId);
+  const pct = Math.min(100, (spent/BUDGET)*100);
+
+  const filtered = state.players
+    .filter(p => {
+      const posOk = dtFilter === 'todos' || p.pos === dtFilter;
+      const teamOk = dtTeamFilter === 'todos' || p.teamId === dtTeamFilter;
+      return posOk && teamOk;
+    })
+    .sort((a,b) => (b.valor||0) - (a.valor||0));
+
+  tc.innerHTML = `
+    <div class="card" style="padding:0.9rem 1.2rem;margin-bottom:0">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.4rem">
+        <div style="font-size:0.78rem;color:var(--muted)">Saldo disponible</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.2rem;font-weight:700;color:${left<10?'var(--red)':left<25?'var(--gold)':'var(--green)'}">$${left}M</div>
+      </div>
+      <div class="budget-bar">
+        <div class="budget-fill" style="width:${pct}%;background:${pct>85?'var(--red)':pct>60?'var(--gold)':'var(--green)'}"></div>
+      </div>
+    </div>
+    ${!state.mercadoAbierto ? `<div class="alert alert-info" style="margin:0.5rem 0">🔴 Mercado cerrado — solo podés ver los jugadores.</div>` : ''}
+    <div class="card">
+      <div class="card-title">🛒 Mercado de Jugadores</div>
+
+      <div style="font-size:0.72rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.4rem">Posición</div>
+      <div class="filter-bar" style="margin-bottom:0.85rem">
+        ${['todos','Arquero','Defensor','Mediocampista','Delantero'].map(f=>`
+          <div class="filter-chip ${dtFilter===f?'active':''}" onclick="dtFilter='${f}';renderDtMercado()">${f==='todos'?'Todas':f}</div>
+        `).join('')}
+      </div>
+
+      <div style="font-size:0.72rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.4rem">Equipo</div>
+      <div class="filter-bar" style="margin-bottom:1rem">
+        <div class="filter-chip ${dtTeamFilter==='todos'?'active':''}" onclick="dtTeamFilter='todos';renderDtMercado()">Todos</div>
+        ${state.teams.map(t=>`
+          <div class="filter-chip ${dtTeamFilter===t.id?'active':''}" onclick="dtTeamFilter='${t.id}';renderDtMercado()">${t.name}</div>
+        `).join('')}
+      </div>
+
+      ${filtered.length === 0 ? `<div class="empty-state"><div class="empty-icon">🔍</div><p>No hay jugadores con ese filtro</p></div>` : `
+      <div class="player-list">
+        ${filtered.map(p => {
+          const team = state.teams.find(t=>t.id===p.teamId);
+          const inTeam = roster.includes(p.id);
+          const canAfford = (p.valor||0) <= left;
+          return `<div class="player-item ${inTeam?'selected':''}">
+            <div class="player-info" style="flex:1">
+              <div class="player-name">${posEmoji(p.pos)} ${p.name} ${inTeam?'<span style="color:var(--green);font-size:0.75rem">✓ En mi equipo</span>':''}</div>
+              <div class="player-meta">${team?team.name:'Sin equipo'} · <span class="badge ${getBadgeClass(p.pos)}">${p.pos}</span></div>
+              <div style="font-size:0.72rem;margin-top:0.15rem;color:var(--muted)">
+                ${state.activeFecha ? `<span style="color:${calcPlayerActivePts(p.id)>0?'#00C853':calcPlayerActivePts(p.id)<0?'#FF1744':'#6A8F6A'}">${calcPlayerActivePts(p.id)>0?'+':''}${calcPlayerActivePts(p.id)} F${state.activeFecha}</span> · ` : ''}
+                ${calcPlayerTotalPts(p.id)} pts total
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.4rem">
+              <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:700;color:var(--gold)">${p.valor ? '$'+p.valor+'M' : '—'}</div>
+              ${state.mercadoAbierto ? (inTeam
+                ? `<button class="btn btn-danger btn-sm" onclick="dtVenderJugador('${p.id}')">Vender</button>`
+                : canAfford
+                  ? `<button class="btn btn-primary btn-sm" onclick="dtFicharJugador('${p.id}')">Fichar</button>`
+                  : `<button class="btn btn-secondary btn-sm" disabled style="opacity:0.35;cursor:not-allowed">Sin saldo</button>`
+              ) : ''}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>`}
+    </div>`;
+}
+
+function dtFicharJugador(pid) {
+  const p = state.players.find(pl => pl.id === pid);
+  const left = getDtBudgetLeft(currentDtId);
+  if (!p) return;
+  if ((p.valor||0) > left) { alert('No tenés saldo suficiente para fichar a ' + p.name + '. Necesitás $' + (p.valor||0) + 'M pero solo tenés $' + left + 'M.'); return; }
+  const newLeft = left - (p.valor||0);
+  const html = `<div class="modal-overlay"><div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">✅ Fichar jugador</div>
+    <p style="margin-bottom:0.5rem;font-size:0.95rem">¿Fichar a <strong style="color:var(--text)">${p.name}</strong>?</p>
+    <p style="color:var(--gold);font-size:0.88rem;margin-bottom:1rem">Costo: <strong>$${p.valor||0}M</strong> · Saldo restante: <strong>$${newLeft}M</strong></p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="dtConfirmarFichaje('${pid}')">Fichar</button>
+    </div>
+  </div></div>`;
+  document.getElementById('modal-container').innerHTML = html;
+}
+
+function dtConfirmarFichaje(pid) {
+  const p = state.players.find(pl => pl.id === pid);
+  if (!state.dtTeams[currentDtId]) state.dtTeams[currentDtId] = [];
+  state.dtTeams[currentDtId].push(pid);
+  state.transfers = state.transfers || [];
+  state.transfers.push({
+    dtId: currentDtId, playerId: pid, playerName: p?.name,
+    type: 'fichar', valor: p?.valor||0,
+    fecha: new Date().toLocaleDateString('es-AR')
+  });
+  save(); closeModal(); renderDtMercado();
+}
+
+function dtVenderJugador(pid) {
+  const p = state.players.find(pl => pl.id === pid);
+  const html = `<div class="modal-overlay"><div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">💸 Vender jugador</div>
+    <p style="margin-bottom:0.5rem;font-size:0.95rem">¿Vender a <strong style="color:var(--text)">${p?.name}</strong>?</p>
+    <p style="color:var(--gold);font-size:0.88rem;margin-bottom:1rem">Recibís <strong>$${p?.valor||0}M</strong> de vuelta a tu presupuesto.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-danger" onclick="dtConfirmarVenta('${pid}')">Vender</button>
+    </div>
+  </div></div>`;
+  document.getElementById('modal-container').innerHTML = html;
+}
+
+function dtConfirmarVenta(pid) {
+  const p = state.players.find(pl => pl.id === pid);
+  state.dtTeams[currentDtId] = (state.dtTeams[currentDtId]||[]).filter(id => id !== pid);
+  state.transfers = state.transfers || [];
+  state.transfers.push({
+    dtId: currentDtId, playerId: pid, playerName: p?.name,
+    type: 'vender', valor: p?.valor||0,
+    fecha: new Date().toLocaleDateString('es-AR')
+  });
+  save(); closeModal(); renderDtMercado();
+}
+
+function calcDtFechaPts(dtId) {
+  const roster = state.dtTeams[dtId] || [];
+  const captainId = state.dtCaptains[dtId] || null;
+  return roster.reduce((sum, pid) => {
+    const pts = calcPlayerActivePts(pid);
+    return sum + (pid === captainId ? pts * 2 : pts);
+  }, 0);
+}
+
+function renderDtRanking() {
+  const tc = document.getElementById('tab-content');
+  const sorted = [...state.dts].sort((a,b) => calcDtPts(b.id) - calcDtPts(a.id));
+  const activaLabel = state.activeFecha ? `Fecha ${state.activeFecha}` : null;
+
+  tc.innerHTML = `
+    <div class="card">
+      <div class="card-title">🏆 Tabla de posiciones</div>
+      ${activaLabel ? `<div style="font-size:0.78rem;color:var(--muted);margin-bottom:0.75rem">Fecha activa: <span style="color:#00C853">${activaLabel}</span></div>` : ''}
+      ${sorted.length === 0 ? `<div class="empty-state"><div class="empty-icon">🏆</div><p>No hay DTs aún</p></div>` : `
+      ${sorted.map((d,i) => `
+        <div class="ranking-item">
+          <div class="rank-num ${i===0?'top1':i===1?'top2':i===2?'top3':''}">${i+1}</div>
+          <div class="rank-info">
+            <div class="rank-name">${d.name} ${d.id===currentDtId?'<span style="color:var(--green);font-size:0.75rem">← Vos</span>':''}</div>
+            <div class="rank-team">
+              ${(state.dtTeams[d.id]||[]).length}/11 jugadores
+              ${activaLabel?` · <span style="color:#00C853">${calcDtFechaPts(d.id)>0?'+':''}${calcDtFechaPts(d.id)} esta fecha</span>`:''}
+            </div>
+          </div>
+          <div style="text-align:right">
+            <div class="rank-pts">${calcDtPts(d.id)}</div>
+            <div style="font-size:0.68rem;color:var(--muted)">torneo</div>
+          </div>
+        </div>`).join('')}
+      `}
+    </div>`;
+}
+
+</script>
+</body>
+</html>
